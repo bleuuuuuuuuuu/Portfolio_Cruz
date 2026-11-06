@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/", "destination": "gbikes.html", "permanent": true }
+  ]
+}

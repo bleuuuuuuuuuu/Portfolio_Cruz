@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G Bikes | Premium Motorcycle Dealership</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#f5f5f5;
+    color:#111;
+}
+
+.header{
+    width:100%;
+    padding:20px 8%;
+    background:#111827;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.logo h1{
+    color:#ff6600;
+    font-size:34px;
+}
+
+.navbar{
+    display:flex;
+    gap:30px;
+}
+
+.navbar a{
+    text-decoration:none;
+    color:white;
+    font-weight:500;
+    transition:0.3s;
+}
+
+.navbar a:hover{
+    color:#ff6600;
+}
+
+.contact-btn{
+    padding:12px 25px;
+    border:none;
+    background:#ff6600;
+    color:white;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.hero{
+    height:100vh;
+    background:url('logo.jpg') center/cover no-repeat;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.hero-overlay{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.7);
+}
+
+.hero-content{
+    position:relative;
+    text-align:center;
+    color:white;
+    max-width:900px;
+    padding:20px;
+}
+
+.hero-content h1{
+    font-size:72px;
+    margin-bottom:20px;
+}
+
+.hero-content p{
+    font-size:20px;
+    line-height:1.8;
+    margin-bottom:30px;
+}
+
+.hero-buttons{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+}
+
+.primary-btn,
+.secondary-btn{
+    padding:15px 35px;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.primary-btn{
+    background:#ff6600;
+    color:white;
+}
+
+.secondary-btn{
+    background:white;
+    color:#111;
+}
+
+.primary-btn:hover,
+.secondary-btn:hover{
+    transform:translateY(-5px);
+}
+
+.section-title{
+    text-align:center;
+    margin-bottom:50px;
+}
+
+.section-title h2{
+    font-size:45px;
+}
+
+.filter-buttons{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-bottom:50px;
+}
+
+.filter-buttons button{
+    padding:12px 25px;
+    border:none;
+    border-radius:30px;
+    background:#111827;
+    color:white;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.filter-buttons button:hover{
+    background:#ff6600;
+    transform:translateY(-4px);
+}
+
+.featured-bikes{
+    padding:90px 8%;
+}
+
+.bike-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+    gap:35px;
+}
+
+.bike-card{
+    background:white;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 5px 20px rgba(0,0,0,0.1);
+    transition:0.4s;
+}
+
+.bike-card:hover{
+    transform:translateY(-10px);
+}
+
+.bike-card img{
+    width:100%;
+    height:260px;
+    object-fit:cover;
+}
+
+.bike-info{
+    padding:25px;
+}
+
+.badge{
+    padding:8px 15px;
+    border-radius:20px;
+    font-size:14px;
+    font-weight:600;
+    display:inline-block;
+    margin-bottom:15px;
+}
+
+.available{
+    background:#d1fae5;
+    color:#065f46;
+}
+
+.bike-category{
+    color:#ff6600;
+    font-weight:600;
+    margin:10px 0;
+}
+
+.specs{
+    display:flex;
+    gap:20px;
+    margin:15px 0;
+    flex-wrap:wrap;
+}
+
+.bike-buttons{
+    display:flex;
+    gap:15px;
+    margin-top:25px;
+}
+
+.details-btn,
+.inquire-btn{
+    flex:1;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.3s;
+}
+
+.details-btn{
+    background:#111827;
+    color:white;
+}
+
+.inquire-btn{
+    background:#ff6600;
+    color:white;
+}
+
+.details-btn:hover,
+.inquire-btn:hover{
+    transform:translateY(-4px);
+}
+
+.services{
+    padding:90px 8%;
+    background:#111827;
+    color:white;
+}
+
+.service-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:30px;
+}
+
+.service-card{
+    background:#1f2937;
+    padding:40px;
+    border-radius:20px;
+    transition:0.4s;
+    cursor:pointer;
+}
+
+.service-card:hover{
+    transform:translateY(-12px) scale(1.02);
+    box-shadow:0 15px 30px rgba(0,0,0,0.4);
+}
+
+.service-card h3{
+    color:#ff6600;
+    margin-bottom:15px;
+}
+
+.reviews{
+    padding:90px 8%;
+}
+
+.review-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:30px;
+    margin-bottom:30px;
+}
+
+.review-card{
+    background:white;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.08);
+}
+
+.review-card .stars{
+    font-size:22px;
+    margin-bottom:10px;
+}
+
+.review-card .reviewer-name{
+    margin-top:15px;
+    font-weight:600;
+    color:#ff6600;
+}
+
+.contact{
+    padding:100px 8%;
+    background:#111827;
+    color:white;
+    text-align:center;
+}
+
+.contact h2{
+    font-size:48px;
+    margin-bottom:20px;
+}
+
+.footer{
+    background:#0f172a;
+    color:white;
+    text-align:center;
+    padding:40px;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    z-index:9999;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.8);
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content{
+    background:white;
+    width:90%;
+    max-width:750px;
+    padding:40px;
+    border-radius:20px;
+    position:relative;
+    max-height:90vh;
+    overflow-y:auto;
+}
+
+.modal-content h2{
+    margin-bottom:25px;
+    color:#111827;
+}
+
+.modal-content label{
+    display:block;
+    font-weight:600;
+    margin-bottom:8px;
+    color:#333;
+    font-size:14px;
+}
+
+.modal-content input,
+.modal-content textarea,
+.modal-content select{
+    width:100%;
+    padding:15px;
+    margin-bottom:20px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    font-family:'Poppins', sans-serif;
+    font-size:14px;
+    outline:none;
+    transition:0.3s;
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus,
+.modal-content select:focus{
+    border-color:#ff6600;
+}
+
+.modal-content button{
+    width:100%;
+    padding:15px;
+    border:none;
+    background:#ff6600;
+    color:white;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:16px;
+    font-family:'Poppins', sans-serif;
+    transition:0.3s;
+}
+
+.modal-content button:hover{
+    background:#e55a00;
+    transform:translateY(-2px);
+}
+
+.close-btn{
+    position:absolute;
+    top:15px;
+    right:20px;
+    font-size:30px;
+    cursor:pointer;
+    color:#333;
+    background:none;
+    width:auto;
+    padding:0;
+    border:none;
+    line-height:1;
+}
+
+.close-btn:hover{
+    color:#ff6600;
+    background:none;
+    transform:none;
+}
+
+.gallery-image{
+    width:100%;
+    height:420px;
+    object-fit:cover;
+    border-radius:15px;
+}
+
+.gallery-controls{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+.gallery-controls button{
+    flex:1;
+}
+
+.finance-result-box{
+    background:#f9fafb;
+    border:2px solid #ff6600;
+    border-radius:15px;
+    padding:25px;
+    margin-top:20px;
+    display:none;
+}
+
+.finance-result-box h3{
+    color:#ff6600;
+    margin-bottom:15px;
+    font-size:18px;
+}
+
+.finance-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.finance-table th{
+    background:#111827;
+    color:white;
+    padding:12px;
+    text-align:left;
+    font-size:13px;
+}
+
+.finance-table td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    font-size:13px;
+}
+
+.finance-table tr:hover td{
+    background:#fff3eb;
+}
+
+.dp-warning{
+    color:#dc2626;
+    font-size:13px;
+    margin-top:-15px;
+    margin-bottom:15px;
+    display:none;
+}
+
+.star-rating{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+    flex-direction:row-reverse;
+    justify-content:flex-end;
+}
+
+.star-rating input{
+    display:none;
+    width:auto;
+    margin-bottom:0;
+}
+
+.star-rating label{
+    font-size:36px;
+    color:#ddd;
+    cursor:pointer;
+    transition:0.2s;
+    margin-bottom:0;
+}
+
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label{
+    color:#ff6600;
+}
+
+.upload-area{
+    border:2px dashed #ddd;
+    border-radius:10px;
+    padding:30px;
+    text-align:center;
+    cursor:pointer;
+    transition:0.3s;
+    margin-bottom:20px;
+    background:#fafafa;
+}
+
+.upload-area:hover{
+    border-color:#ff6600;
+    background:#fff8f5;
+}
+
+.upload-area p{
+    color:#888;
+    font-size:14px;
+}
+
+.upload-preview{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.upload-preview img{
+    width:80px;
+    height:80px;
+    object-fit:cover;
+    border-radius:8px;
+    border:2px solid #ddd;
+}
+
+.success-msg{
+    background:#d1fae5;
+    color:#065f46;
+    padding:15px 20px;
+    border-radius:10px;
+    font-weight:600;
+    text-align:center;
+    margin-top:15px;
+    display:none;
+}
+
+.error-msg{
+    background:#fee2e2;
+    color:#991b1b;
+    padding:15px 20px;
+    border-radius:10px;
+    font-weight:600;
+    text-align:center;
+    margin-top:15px;
+    display:none;
+}
+
+.loading-msg{
+    background:#fff3eb;
+    color:#92400e;
+    padding:15px 20px;
+    border-radius:10px;
+    font-weight:600;
+    text-align:center;
+    margin-top:15px;
+    display:none;
+}
+
+@media(max-width:768px){
+    .navbar{ display:none; }
+    .hero-content h1{ font-size:45px; }
+    .hero-buttons{ flex-direction:column; }
+    .modal-content{ padding:25px 20px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="header">
+<div class="logo"><h1>G Bikes</h1></div>
+<nav class="navbar">
+<a href="#home">Home</a>
+<a href="#bikes">Showroom</a>
+<a href="#services">Services</a>
+<a href="#reviews">Reviews</a>
+<a href="#contact">Contact</a>
+</nav>
+<button class="contact-btn" onclick="scrollToContact()">Inquire Now</button>
+</header>
+
+<section class="hero" id="home">
+<div class="hero-overlay"></div>
+<div class="hero-content">
+<h1>Premium Pre-Owned Motorcycles</h1>
+<p>Classic Bikes, Sports Bikes, Adventure Bikes, and Naked Bikes.</p>
+<div class="hero-buttons">
+<button class="primary-btn" onclick="scrollToBikes()">Browse Bikes</button>
+<button class="secondary-btn" onclick="bookViewing()">Book Viewing</button>
+</div>
+</div>
+</section>
+
+<section class="featured-bikes" id="bikes">
+<div class="section-title"><h2>Featured Motorcycles</h2></div>
+<div class="filter-buttons">
+<button onclick="filterBikes('all')">All</button>
+<button onclick="filterBikes('Sportbike')">Sportbikes</button>
+<button onclick="filterBikes('Classic')">Classic Bikes</button>
+<button onclick="filterBikes('Adventure')">Adventure Bikes</button>
+<button onclick="filterBikes('Naked')">Naked Bikes</button>
+</div>
+<div class="bike-grid">
+
+<div class="bike-card" data-category="Naked">
+<img src="gbikes1.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>KTM DUKE 890 R</h3>
+<p class="bike-category">Naked Bike</p>
+<div class="specs"><span>890cc</span><span>13,000 km</span><span>2024</span></div>
+<h2>₱1,000,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["gbikes1.jpg","gbikes2.jpg","gbikes3.jpg"],"KTM DUKE 890 R",`• 2024 Acquired / Registered until 2027 <br>• 13,xxx odo <br>• 2 Original keys with key code<br>• Plate # from LTO<br>• FULL TECH PACK INSTALLED:<br>• IMU Traction Control<br>• Slip Control<br>• Cornering ABS<br>• Quickshifter + Auto Blip<br>• Launch Control<br>• Track Mode<br>• Brembo Stylema 4-Piston Brakes<br>ACCESSORIES:<br>• Akrapovič Slip-on Exhaust (Decat)<br>• SW Motech Crash Guard<br>• GBR Carbon Engine Guard<br>• Integrated LED Tail Light<br>• KTM PowerParts Belly Pan<br>• KTM PowerParts Bar-End Mirrors<br>• Dabrabbit Graphics Kit<br>• BMC Washable Air Filter<br>• Brand New Michelin Road 6 Tires`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+<div class="bike-card" data-category="Sportbike">
+<img src="ninja.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>Ninja 1000 SX</h3>
+<p class="bike-category">Sportbike</p>
+<div class="specs"><span>1000cc</span><span>14,000 km</span><span>2021</span></div>
+<h2>₱950,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["ninja.jpg","ninja1.jpg","ninja2.jpg"],"NINJA 1000 SX",`• KAWASAKI NINJA 1000 SX <br>• 2021 model | inline 4 screamer engine <br>• 14k odo only <br>• 2 original keys <br>• TFT display <br>• 4 riding modes <br>• kawasaki quickshifter & autoblip <br>• adjustable suspension <br>• cruise control`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+<div class="bike-card" data-category="Adventure">
+<img src="ducat.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>DUCATI V4 SPIKES PEAK</h3>
+<p class="bike-category">Adventure Bike</p>
+<div class="specs"><span>1200cc</span><span>16,000 km</span><span>2023</span></div>
+<h2>₱1,350,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["ducat.jpg","ducat2.jpg","ducat3.jpg"],"DUCATI V4 SPIKES PEAK",`° Complete legal documents <br>° 2023 Acquired | Registered til 2026 <br>° Original Plate# from LTO <br>° 16k odo <br>° Keyless <br>° 6.5inch TFT screen <br>° Adaptive Cruise Control <br>° Blindspot monitoring <br>° Quickshifter/Autoblip <br>° Ohlins Electronic Adjustable suspension <br>° Brembo brakes front & rear <br>° 4 power modes with race mode <br>° 8 Levels traction control <br>° 8 Levels wheelie control <br>° 3 Levels cornering ABS <br>° Hill hold control <br>° Heated grips<br>° Akrapovic full exhaust <br>° Wunderlich crash bar <br>° Ducati foglights <br>° Radiator Cover <br>° Oil Cooler Cover`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+<div class="bike-card" data-category="Classic">
+<img src="bmw.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>BMW R NINE T</h3>
+<p class="bike-category">Classic Bike</p>
+<div class="specs"><span>900cc</span><span>5,000 km</span><span>2021</span></div>
+<h2>₱780,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["bmw.jpg","bmw2.jpg","bmw3.jpg"],"BMW R NINE T",`• 50th Anniversary Edition <br>• 1 out of 30 in the philippines <br>• Option 719 <br>• 10,xxx odo | garage king <br>• Heated grips <br>• 2 original keys <br>• Newly PMS @RSA <br>• 2020 Acquired | Registered till 2026 <br>• Akrapovic Full System <br>• Spoke wheels with new tires <br>• Clear water driving light <br>• Engine protector bars <br>• Spal fan`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+<div class="bike-card" data-category="Sportbike">
+<img src="szki.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>Suzuki GSX-S1000 GT</h3>
+<p class="bike-category">Sportbike</p>
+<div class="specs"><span>1000cc</span><span>6,000 km</span><span>2023</span></div>
+<h2>₱1,150,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["szki.jpg","szki2.jpg","szki3.jpg"],"Suzuki GSX-S1000 GT",`• 999cc liquid-cooled inline-four engine <br>• 2 Original keys | TFT display <br>• 4,xxx odo | Well Maintained<br>• 2023 Acquired | Registered till 2027<br>• QuickShifter & Autoblip<br>• Cruise Control<br>• Ride-by-wire<br>• Riding modes<br>• 5-level traction control<br>• Brembo brakes<br>• Bnew price is ₱842k<br>• Open for swap to other bigbikes`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+<div class="bike-card" data-category="Naked">
+<img src="trium.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>Triumph Scrambler 1200XE</h3>
+<p class="bike-category">Classic Bike</p>
+<div class="specs"><span>1200cc</span><span>7,000 km</span><span>2022</span></div>
+<h2>₱720,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["trium.jpg","trium2.jpg","trium3.jpg"],"Triumph Scrambler 1200XE",`• Öhlins triumph suspension <br>• Brembo brakes <br>• 1 remote key & 2 orig keys <br>• Original Plate number from LTO <br>• Complete booklets & service <br>• Newly PMS @triumph pampanga <br>• Keyless Entry <br>• 18K Odo <br>• Brandnew price is 1.260m <br>• Complete sales invoice & receipts`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+<div class="bike-card" data-category="Adventure">
+<img src="adv.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>BMW R 1250 GSA</h3>
+<p class="bike-category">Adventure Bike</p>
+<div class="specs"><span>1250cc</span><span>11,000 km</span><span>2021</span></div>
+<h2>₱920,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["adv.jpg","adv.jpg","adv3.jpg"],"BMW R 1250 GSA",`• Ice Grey / Standard suspension<br>• 30 liters tank capacity <br>• Keyless Entry | TFT display<br>• 17,xxx odo | Well Maintained<br>• 2021 Model | Registered till 2026<br>• QuickShifter & Autoblip<br>• Cruise Control<br>• Heated Grips<br>• electronic suspension <br>• electronic bmw steering damper<br>• 4 riding modes<br>• Akrapovic Titanium Exhaust<br>• Bmw Fog light<br>• Orig Bmw side panniers bracket<br>• Orig Bmw top box bracket<br>• Bmw Crash Bars <br>• Wunderlich Lens cover<br>• Brembo brake disc<br>• HP engine cover<br>• HP levers<br>• Bmw skid plate<br>• Open for swap to other bigbikes`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+<div class="bike-card" data-category="Classic">
+<img src="ben.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>Benelli TNT 600i</h3>
+<p class="bike-category">Naked Bike</p>
+<div class="specs"><span>600cc</span><span>4,000 km</span><span>2023</span></div>
+<h2>₱690,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["ben.jpg","ben2.jpg","ben3.jpg"],"Benelli TNT 600i",`° 2023 Acquired | Registered till 2026<br>° 500 odo | Garage King<br>° 3 Original Keys<br>° Complete Original OR/CR<br>° Original Plate # from LTO<br>° Crash Guard<br>° Loud horn<br>° Open for swap`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+<div class="bike-card" data-category="Sportbike">
+<img src="ymh.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>YAMAHA R7</h3>
+<p class="bike-category">Sportbike</p>
+<div class="specs"><span>689cc</span><span>1,000 km</span><span>2024</span></div>
+<h2>₱1,450,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["ymh.jpg","ymh2.jpg","ymh3.jpg"],"YAMAHA R7",`• 2025 Acquired | 3 months old<br>• 1,xxx odo | garage king<br>• 689cc | CP2 engine<br>• 2 black & red original keys<br>• SC project full exhaust <br>• Stock full exhaust included<br>• Original Plate Number from LTO<br>• Brandnew price is ₱597,000<br>• Open for swap`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+<div class="bike-card" data-category="Classic">
+<img src="harley.jpg">
+<div class="bike-info">
+<span class="badge available">Available</span>
+<h3>Harley Davidson Street 500</h3>
+<p class="bike-category">Classic Bike</p>
+<div class="specs"><span>500cc</span><span>16,000 km</span><span>2022</span></div>
+<h2>₱420,000</h2>
+<div class="bike-buttons">
+<button class="details-btn" onclick='openGallery(["harley.jpg","harley2.jpg","harley3.jpg"],"Harley Davidson Street 500",`• 2017 Acquired | Registered til 2026<br>• 16,xxx odo only <br>• All stock engine <br>• Orig plate number from LTO <br>• Screaming eagle full exhaust <br>• Customized seat <br>• Passenger back rest <br>• No drops / No scratches <br>• Open for swap <br>• Pm for soundcheck`)'>View Details</button>
+<button class="inquire-btn" onclick="goToFacebook()">Inquire Now</button>
+</div>
+</div>
+</div>
+
+</div>
+</section>
+
+<section class="services" id="services">
+<div class="section-title"><h2 style="color:white;">Our Services</h2></div>
+<div class="service-grid">
+<div class="service-card">
+<h3>Trade-In Valuation</h3>
+<p>Upgrade your motorcycle through our trade-in program.</p>
+<button class="inquire-btn" style="margin-top:20px;" onclick="openTradeModal()">Trade-In Inquiry</button>
+</div>
+<div class="service-card">
+<h3>Financing Assistance</h3>
+<p>Flexible installment options for qualified buyers.</p>
+<button class="inquire-btn" style="margin-top:20px;" onclick="openFinancingModal()">View Installments</button>
+</div>
+</div>
+</section>
+
+<section class="reviews" id="reviews">
+<div class="section-title"><h2>Customer Reviews</h2></div>
+<div class="review-grid" id="reviewGrid">
+<div class="review-card">
+<div class="stars">★★★★★</div>
+<p>Very smooth transaction and excellent motorcycle condition.</p>
+<div class="reviewer-name">— Mariano Gerard</div>
+</div>
+</div>
+<div style="text-align:center; margin-top:40px;">
+<button class="inquire-btn" style="padding:15px 30px;" onclick="openReviewModal()">Write a Review</button>
+</div>
+</section>
+
+<section class="contact" id="contact">
+<h2>Visit G Bikes</h2>
+<p>Caloocan, Philippines, 1402</p>
+<p>Number: +63 94 485 2203</p>
+<button class="inquire-btn" style="margin-top:20px;" onclick="goToFacebook()">Message Us</button>
+</section>
+
+<footer class="footer">
+<h2 style="color:#ff6600;">G Bikes</h2>
+<p>Premium Pre-Owned Motorcycle Dealership</p>
+</footer>
+
+
+<!-- MODAL 1: GALLERY -->
+<div class="modal" id="galleryModal">
+<div class="modal-content">
+<span class="close-btn" onclick="closeGallery()">&times;</span>
+<img id="galleryImage" class="gallery-image" src="">
+<h2 id="galleryTitle" style="margin-top:20px;margin-bottom:15px;"></h2>
+<div id="galleryDescription" style="line-height:1.8;color:#444;margin-bottom:20px;"></div>
+<div class="gallery-controls">
+<button onclick="prevImage()">Previous</button>
+<button onclick="nextImage()">Next</button>
+</div>
+</div>
+</div>
+
+
+<!-- MODAL 2: BOOK VIEWING -->
+<div class="modal" id="viewingModal">
+<div class="modal-content">
+<span class="close-btn" onclick="closeModal('viewingModal')">&times;</span>
+<h2>📅 Book a Viewing Appointment</h2>
+<p style="color:#666;margin-bottom:25px;font-size:14px;">Schedule a visit to personally check out the motorcycle you're interested in.</p>
+<label>Your Full Name</label>
+<input type="text" id="viewName" placeholder="e.g. Juan Dela Cruz">
+<label>Contact Number</label>
+<input type="tel" id="viewPhone" placeholder="e.g. 09XX XXX XXXX">
+<label>Email Address</label>
+<input type="email" id="viewEmail" placeholder="e.g. juan@email.com">
+<label>Motorcycle You Want to View</label>
+<select id="viewBike">
+<option value="">— Select a Motorcycle —</option>
+<option>KTM DUKE 890 R — ₱1,000,000</option>
+<option>Ninja 1000 SX — ₱950,000</option>
+<option>DUCATI V4 SPIKES PEAK — ₱1,350,000</option>
+<option>BMW R NINE T — ₱780,000</option>
+<option>Suzuki GSX-S1000 GT — ₱1,150,000</option>
+<option>Triumph Scrambler 1200XE — ₱720,000</option>
+<option>BMW R 1250 GSA — ₱920,000</option>
+<option>Benelli TNT 600i — ₱690,000</option>
+<option>YAMAHA R7 — ₱1,450,000</option>
+<option>Harley Davidson Street 500 — ₱420,000</option>
+</select>
+<label>Preferred Date</label>
+<input type="date" id="viewDate">
+<label>Preferred Time</label>
+<select id="viewTime">
+<option value="">— Select Time Slot —</option>
+<option>9:00 AM</option>
+<option>10:00 AM</option>
+<option>11:00 AM</option>
+<option>1:00 PM</option>
+<option>2:00 PM</option>
+<option>3:00 PM</option>
+<option>4:00 PM</option>
+</select>
+<label>Additional Notes (Optional)</label>
+<textarea id="viewNotes" rows="3" placeholder="Any questions or special requests?"></textarea>
+<button onclick="submitViewing()">Confirm Appointment</button>
+<div class="loading-msg" id="viewingLoading">⏳ Saving your appointment...</div>
+<div class="success-msg" id="viewingSuccess">✅ Appointment saved! We'll contact you within 24 hours to confirm your schedule.</div>
+<div class="error-msg" id="viewingError">❌ Something went wrong. Please try again.</div>
+</div>
+</div>
+
+
+<!-- MODAL 3: TRADE-IN -->
+<div class="modal" id="tradeModal">
+<div class="modal-content">
+<span class="close-btn" onclick="closeModal('tradeModal')">&times;</span>
+<h2>🔄 Trade-In Inquiry</h2>
+<p style="color:#666;margin-bottom:25px;font-size:14px;">Fill in your motorcycle details and we'll evaluate your trade-in value.</p>
+<label>Your Full Name</label>
+<input type="text" id="tradeName" placeholder="e.g. Juan Dela Cruz">
+<label>Contact Number</label>
+<input type="tel" id="tradePhone" placeholder="e.g. 09XX XXX XXXX">
+<label>Motorcycle Brand & Model</label>
+<input type="text" id="tradeBike" placeholder="e.g. Honda CBR 600RR">
+<label>Year</label>
+<input type="text" id="tradeYear" placeholder="e.g. 2020">
+<label>Engine Displacement (cc)</label>
+<input type="text" id="tradeCc" placeholder="e.g. 600">
+<label>Mileage (km)</label>
+<input type="text" id="tradeMileage" placeholder="e.g. 15,000 km">
+<label>Current Condition</label>
+<select id="tradeCondition">
+<option value="">— Select Condition —</option>
+<option>Excellent — Looks brand new, no issues</option>
+<option>Good — Minor cosmetic wear, fully functional</option>
+<option>Fair — Some repairs needed, still running</option>
+<option>Poor — Needs major repairs</option>
+</select>
+<label>Modifications / Upgrades (if any)</label>
+<textarea id="tradeMods" rows="3" placeholder="e.g. Akrapovic exhaust, aftermarket wheels, etc."></textarea>
+<label>Upload Motorcycle Photos (up to 5)</label>
+<div class="upload-area" onclick="document.getElementById('tradePhotos').click()">
+<p>📷 Click to upload photos</p>
+<p style="font-size:12px;margin-top:5px;">JPG, PNG accepted</p>
+</div>
+<input type="file" id="tradePhotos" accept="image/*" multiple style="display:none" onchange="previewTradePhotos(event)">
+<div class="upload-preview" id="tradePreview"></div>
+<label>Asking Price (₱)</label>
+<input type="number" id="tradePrice" placeholder="e.g. 300000">
+<label>Additional Details</label>
+<textarea id="tradeDetails" rows="3" placeholder="Complete papers? Any accidents? Other info you want to share."></textarea>
+<button onclick="submitTrade()">Submit Trade-In Inquiry</button>
+<div class="loading-msg" id="tradeLoading">⏳ Submitting your inquiry...</div>
+<div class="success-msg" id="tradeSuccess">✅ Trade-in inquiry saved! Our team will evaluate and get back to you within 24–48 hours.</div>
+<div class="error-msg" id="tradeError">❌ Something went wrong. Please try again.</div>
+</div>
+</div>
+
+
+<!-- MODAL 4: FINANCING -->
+<div class="modal" id="financingModal">
+<div class="modal-content">
+<span class="close-btn" onclick="closeModal('financingModal')">&times;</span>
+<h2>💳 Financing Calculator</h2>
+<p style="color:#666;margin-bottom:25px;font-size:14px;">Choose a motorcycle and see how much your monthly payment will be. Minimum 40% down payment required. Interest rate: 1.5% per month.</p>
+<label>Your Full Name</label>
+<input type="text" id="finName" placeholder="e.g. Juan Dela Cruz">
+<label>Contact Number</label>
+<input type="tel" id="finPhone" placeholder="e.g. 09XX XXX XXXX">
+<label>Select Motorcycle</label>
+<select id="finBike" onchange="updateFinancePrice()">
+<option value="">— Choose a Motorcycle —</option>
+<option value="1000000">KTM DUKE 890 R — ₱1,000,000</option>
+<option value="950000">Ninja 1000 SX — ₱950,000</option>
+<option value="1350000">DUCATI V4 SPIKES PEAK — ₱1,350,000</option>
+<option value="780000">BMW R NINE T — ₱780,000</option>
+<option value="1150000">Suzuki GSX-S1000 GT — ₱1,150,000</option>
+<option value="720000">Triumph Scrambler 1200XE — ₱720,000</option>
+<option value="920000">BMW R 1250 GSA — ₱920,000</option>
+<option value="690000">Benelli TNT 600i — ₱690,000</option>
+<option value="1450000">YAMAHA R7 — ₱1,450,000</option>
+<option value="420000">Harley Davidson Street 500 — ₱420,000</option>
+</select>
+<label>Selling Price</label>
+<input type="text" id="finPrice" placeholder="Auto-filled when you select a bike" readonly style="background:#f5f5f5;">
+<label>Down Payment Amount (₱) — Minimum 40%</label>
+<input type="number" id="finDP" placeholder="Enter your down payment" oninput="checkDP()">
+<p class="dp-warning" id="dpWarning">⚠️ Down payment must be at least 40% of the selling price.</p>
+<button onclick="calculateFinancing()" style="margin-bottom:0;">Calculate Monthly Payment</button>
+<div class="finance-result-box" id="financeResult">
+<h3>📊 Payment Breakdown</h3>
+<p id="finSummary" style="margin-bottom:15px;font-size:13px;color:#555;"></p>
+<table class="finance-table">
+<thead><tr><th>Term</th><th>Monthly Payment</th><th>Total Interest</th><th>Total Amount</th></tr></thead>
+<tbody id="financeTableBody"></tbody>
+</table>
+<p style="font-size:11px;color:#888;margin-top:12px;">* Interest rate: 1.5% per month on loanable amount.</p>
+</div>
+<button onclick="submitFinancing()" id="finSubmitBtn" style="margin-top:15px;display:none;">Submit Financing Application</button>
+<div class="loading-msg" id="financeLoading">⏳ Submitting your application...</div>
+<div class="success-msg" id="financeSuccess">✅ Financing application saved! Our team will contact you within 24 hours.</div>
+<div class="error-msg" id="financeError">❌ Something went wrong. Please try again.</div>
+</div>
+</div>
+
+
+<!-- MODAL 5: REVIEW -->
+<div class="modal" id="reviewModal">
+<div class="modal-content">
+<span class="close-btn" onclick="closeModal('reviewModal')">&times;</span>
+<h2>⭐ Write a Review</h2>
+<p style="color:#666;margin-bottom:25px;font-size:14px;">Share your experience with G Bikes. Your feedback helps other buyers!</p>
+<label>Your Name</label>
+<input type="text" id="reviewName" placeholder="e.g. Juan Dela Cruz">
+<label>Your Rating</label>
+<div class="star-rating" id="starRating">
+<input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 stars">★</label>
+<input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 stars">★</label>
+<input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 stars">★</label>
+<input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 stars">★</label>
+<input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 star">★</label>
+</div>
+<label>Motorcycle Purchased (Optional)</label>
+<select id="reviewBike">
+<option value="">— Select if applicable —</option>
+<option>KTM DUKE 890 R</option>
+<option>Ninja 1000 SX</option>
+<option>DUCATI V4 SPIKES PEAK</option>
+<option>BMW R NINE T</option>
+<option>Suzuki GSX-S1000 GT</option>
+<option>Triumph Scrambler 1200XE</option>
+<option>BMW R 1250 GSA</option>
+<option>Benelli TNT 600i</option>
+<option>YAMAHA R7</option>
+<option>Harley Davidson Street 500</option>
+</select>
+<label>Your Review</label>
+<textarea id="reviewComment" rows="5" placeholder="Tell us about your experience — the bike, the service, the transaction process..."></textarea>
+<button onclick="submitReview()">Post My Review</button>
+<div class="loading-msg" id="reviewLoading">⏳ Posting your review...</div>
+<div class="success-msg" id="reviewSuccess">✅ Review posted and saved! Thank you for sharing your experience.</div>
+<div class="error-msg" id="reviewError">❌ Something went wrong. Please try again.</div>
+</div>
+</div>
+
+
+<script>
+
+/* =============================================
+   SUPABASE SETUP
+============================================= */
+const SUPABASE_URL = 'https://aywuvfsaxxoimhuehkpj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5d3V2ZnNheHhvaW1odWVoa3BqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMDg5NDYsImV4cCI6MjA5NDc4NDk0Nn0.oJiKJ6WUQXi_p30inc4z4dD7hX-z4i6eZysHTI3DM-4';
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* =============================================
+   HELPER: show/hide status messages
+============================================= */
+function showMsg(id, type){
+    // type: 'loading' | 'success' | 'error'
+    ['loading','success','error'].forEach(function(t){
+        let el = document.getElementById(id.replace('Loading','').replace('Success','').replace('Error','') + t.charAt(0).toUpperCase() + t.slice(1));
+        if(el) el.style.display = 'none';
+    });
+    let target = document.getElementById(id);
+    if(target) target.style.display = 'block';
+}
+
+function hideAllMsgs(prefix){
+    ['Loading','Success','Error'].forEach(function(s){
+        let el = document.getElementById(prefix + s);
+        if(el) el.style.display = 'none';
+    });
+}
+
+/* =============================================
+   FILTER
+============================================= */
+function filterBikes(category){
+    document.querySelectorAll(".bike-card").forEach(function(bike){
+        bike.style.display = (category === "all" || bike.dataset.category === category) ? "block" : "none";
+    });
+}
+
+/* =============================================
+   SCROLL
+============================================= */
+function scrollToBikes(){ document.getElementById("bikes").scrollIntoView({behavior:"smooth"}); }
+function scrollToContact(){ document.getElementById("contact").scrollIntoView({behavior:"smooth"}); }
+
+/* =============================================
+   FACEBOOK
+============================================= */
+function goToFacebook(){ window.open("https://www.facebook.com/profile.php?id=100088268786341","_blank"); }
+
+/* =============================================
+   GALLERY
+============================================= */
+let galleryImages = [];
+let currentImageIndex = 0;
+
+function openGallery(images, title, description){
+    galleryImages = images;
+    currentImageIndex = 0;
+    document.getElementById("galleryModal").style.display = "flex";
+    document.getElementById("galleryImage").src = galleryImages[0];
+    document.getElementById("galleryTitle").innerHTML = title;
+    document.getElementById("galleryDescription").innerHTML = description;
+}
+
+function closeGallery(){ document.getElementById("galleryModal").style.display = "none"; }
+
+function nextImage(){
+    currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+    document.getElementById("galleryImage").src = galleryImages[currentImageIndex];
+}
+
+function prevImage(){
+    currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+    document.getElementById("galleryImage").src = galleryImages[currentImageIndex];
+}
+
+/* =============================================
+   OPEN / CLOSE MODALS
+============================================= */
+function closeModal(id){ document.getElementById(id).style.display = "none"; }
+
+function bookViewing(){
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById("viewDate").min = today;
+    document.getElementById("viewingModal").style.display = "flex";
+}
+
+function openTradeModal(){ document.getElementById("tradeModal").style.display = "flex"; }
+function openFinancingModal(){ document.getElementById("financingModal").style.display = "flex"; }
+function openReviewModal(){ document.getElementById("reviewModal").style.display = "flex"; }
+
+window.onclick = function(event){
+    ["galleryModal","viewingModal","tradeModal","financingModal","reviewModal"].forEach(function(id){
+        let modal = document.getElementById(id);
+        if(event.target === modal) modal.style.display = "none";
+    });
+}
+
+/* =============================================
+   BOOK VIEWING — SUBMIT → SUPABASE
+============================================= */
+async function submitViewing(){
+    let name  = document.getElementById("viewName").value.trim();
+    let phone = document.getElementById("viewPhone").value.trim();
+    let email = document.getElementById("viewEmail").value.trim();
+    let bike  = document.getElementById("viewBike").value;
+    let date  = document.getElementById("viewDate").value;
+    let time  = document.getElementById("viewTime").value;
+    let notes = document.getElementById("viewNotes").value.trim();
+
+    if(!name || !phone || !bike || !date || !time){
+        alert("Please fill in all required fields.");
+        return;
+    }
+
+    showMsg("viewingLoading", "loading");
+
+    const { error } = await db.from('appointments').insert([{
+        full_name: name,
+        phone: phone,
+        email: email,
+        motorcycle: bike,
+        preferred_date: date,
+        preferred_time: time,
+        notes: notes
+    }]);
+
+    if(error){
+        console.error(error);
+        hideAllMsgs("viewing");
+        showMsg("viewingError", "error");
+        return;
+    }
+
+    hideAllMsgs("viewing");
+    showMsg("viewingSuccess", "success");
+
+    setTimeout(function(){
+        document.getElementById("viewName").value = "";
+        document.getElementById("viewPhone").value = "";
+        document.getElementById("viewEmail").value = "";
+        document.getElementById("viewBike").value = "";
+        document.getElementById("viewDate").value = "";
+        document.getElementById("viewTime").value = "";
+        document.getElementById("viewNotes").value = "";
+        hideAllMsgs("viewing");
+        closeModal("viewingModal");
+    }, 3000);
+}
+
+/* =============================================
+   TRADE-IN PHOTO PREVIEW
+============================================= */
+function previewTradePhotos(event){
+    let preview = document.getElementById("tradePreview");
+    preview.innerHTML = "";
+    let files = event.target.files;
+    for(let i = 0; i < Math.min(files.length, 5); i++){
+        let reader = new FileReader();
+        reader.onload = function(e){
+            let img = document.createElement("img");
+            img.src = e.target.result;
+            preview.appendChild(img);
+        };
+        reader.readAsDataURL(files[i]);
+    }
+}
+
+/* =============================================
+   TRADE-IN — SUBMIT → SUPABASE
+============================================= */
+async function submitTrade(){
+    let name      = document.getElementById("tradeName").value.trim();
+    let phone     = document.getElementById("tradePhone").value.trim();
+    let bike      = document.getElementById("tradeBike").value.trim();
+    let year      = document.getElementById("tradeYear").value.trim();
+    let cc        = document.getElementById("tradeCc").value.trim();
+    let mileage   = document.getElementById("tradeMileage").value.trim();
+    let condition = document.getElementById("tradeCondition").value;
+    let mods      = document.getElementById("tradeMods").value.trim();
+    let price     = document.getElementById("tradePrice").value.trim();
+    let details   = document.getElementById("tradeDetails").value.trim();
+
+    if(!name || !phone || !bike || !year || !cc || !mileage || !condition){
+        alert("Please fill in all required fields.");
+        return;
+    }
+
+    showMsg("tradeLoading", "loading");
+
+    const { error } = await db.from('trade_ins').insert([{
+        full_name: name,
+        phone: phone,
+        motorcycle: bike,
+        year: year,
+        engine_cc: cc,
+        mileage: mileage,
+        condition: condition,
+        modifications: mods,
+        asking_price: price ? parseInt(price) : null,
+        additional_details: details
+    }]);
+
+    if(error){
+        console.error(error);
+        hideAllMsgs("trade");
+        showMsg("tradeError", "error");
+        return;
+    }
+
+    hideAllMsgs("trade");
+    showMsg("tradeSuccess", "success");
+
+    setTimeout(function(){
+        ["tradeName","tradePhone","tradeBike","tradeYear","tradeCc","tradeMileage","tradeMods","tradePrice","tradeDetails"].forEach(function(id){
+            document.getElementById(id).value = "";
+        });
+        document.getElementById("tradeCondition").value = "";
+        document.getElementById("tradePreview").innerHTML = "";
+        hideAllMsgs("trade");
+        closeModal("tradeModal");
+    }, 3000);
+}
+
+/* =============================================
+   FINANCING — AUTO-FILL PRICE
+============================================= */
+function updateFinancePrice(){
+    let val = document.getElementById("finBike").value;
+    document.getElementById("finPrice").value = val ? "₱" + parseInt(val).toLocaleString() : "";
+    document.getElementById("financeResult").style.display = "none";
+    document.getElementById("finSubmitBtn").style.display = "none";
+    document.getElementById("finDP").value = "";
+    document.getElementById("dpWarning").style.display = "none";
+}
+
+function checkDP(){
+    let price = parseFloat(document.getElementById("finBike").value);
+    let dp    = parseFloat(document.getElementById("finDP").value);
+    if(!price) return;
+    document.getElementById("dpWarning").style.display = (dp < price * 0.40) ? "block" : "none";
+}
+
+/* =============================================
+   FINANCING — CALCULATE
+============================================= */
+function calculateFinancing(){
+    let bike = document.getElementById("finBike").value;
+    let dp   = parseFloat(document.getElementById("finDP").value);
+
+    if(!bike){ alert("Please select a motorcycle."); return; }
+
+    let price = parseFloat(bike);
+    let minDP = price * 0.40;
+
+    if(!dp || isNaN(dp)){ alert("Please enter your down payment amount."); return; }
+    if(dp < minDP){
+        document.getElementById("dpWarning").style.display = "block";
+        alert("Minimum down payment is 40% = ₱" + minDP.toLocaleString("en-PH",{minimumFractionDigits:2}));
+        return;
+    }
+
+    document.getElementById("dpWarning").style.display = "none";
+
+    let loanable = price - dp;
+    let rate = 0.015;
+    let terms = [6, 12, 18, 24, 32];
+    let bikeName = document.getElementById("finBike").options[document.getElementById("finBike").selectedIndex].text;
+
+    document.getElementById("finSummary").innerHTML =
+        "<strong>Bike:</strong> " + bikeName + " &nbsp;|&nbsp; " +
+        "<strong>Price:</strong> ₱" + price.toLocaleString() + " &nbsp;|&nbsp; " +
+        "<strong>Down Payment:</strong> ₱" + dp.toLocaleString() + " &nbsp;|&nbsp; " +
+        "<strong>Loanable:</strong> ₱" + loanable.toLocaleString();
+
+    let tbody = document.getElementById("financeTableBody");
+    tbody.innerHTML = "";
+
+    terms.forEach(function(months){
+        let totalInterest = loanable * rate * months;
+        let totalAmount   = loanable + totalInterest + dp;
+        let monthly       = (loanable + totalInterest) / months;
+        let tr = document.createElement("tr");
+        tr.innerHTML =
+            "<td><strong>" + months + " months</strong></td>" +
+            "<td>₱" + monthly.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}) + "</td>" +
+            "<td>₱" + totalInterest.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}) + "</td>" +
+            "<td>₱" + totalAmount.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}) + "</td>";
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById("financeResult").style.display = "block";
+    document.getElementById("finSubmitBtn").style.display = "block";
+}
+
+/* =============================================
+   FINANCING — SUBMIT → SUPABASE
+============================================= */
+async function submitFinancing(){
+    let name  = document.getElementById("finName").value.trim();
+    let phone = document.getElementById("finPhone").value.trim();
+    let bike  = document.getElementById("finBike").value;
+    let dp    = parseFloat(document.getElementById("finDP").value);
+
+    if(!name || !phone || !bike){
+        alert("Please fill in your name and contact number.");
+        return;
+    }
+
+    let price    = parseFloat(bike);
+    let loanable = price - dp;
+    let bikeName = document.getElementById("finBike").options[document.getElementById("finBike").selectedIndex].text;
+
+    showMsg("financeLoading", "loading");
+
+    const { error } = await db.from('financing_applications').insert([{
+        full_name: name,
+        phone: phone,
+        motorcycle: bikeName,
+        selling_price: price,
+        down_payment: dp,
+        loanable_amount: loanable
+    }]);
+
+    if(error){
+        console.error(error);
+        hideAllMsgs("finance");
+        showMsg("financeError", "error");
+        return;
+    }
+
+    hideAllMsgs("finance");
+    showMsg("financeSuccess", "success");
+
+    setTimeout(function(){
+        ["finName","finPhone","finPrice","finDP"].forEach(function(id){ document.getElementById(id).value = ""; });
+        document.getElementById("finBike").value = "";
+        document.getElementById("financeResult").style.display = "none";
+        document.getElementById("finSubmitBtn").style.display = "none";
+        hideAllMsgs("finance");
+        closeModal("financingModal");
+    }, 3000);
+}
+
+/* =============================================
+   REVIEWS — SUBMIT → SUPABASE
+============================================= */
+async function submitReview(){
+    let name    = document.getElementById("reviewName").value.trim();
+    let comment = document.getElementById("reviewComment").value.trim();
+    let bike    = document.getElementById("reviewBike").value;
+    let ratingEl = document.querySelector('input[name="rating"]:checked');
+
+    if(!name){ alert("Please enter your name."); return; }
+    if(!ratingEl){ alert("Please select a star rating."); return; }
+    if(!comment){ alert("Please write your review."); return; }
+
+    let rating = parseInt(ratingEl.value);
+
+    showMsg("reviewLoading", "loading");
+
+    const { error } = await db.from('reviews').insert([{
+        reviewer_name: name,
+        rating: rating,
+        motorcycle: bike || null,
+        comment: comment
+    }]);
+
+    if(error){
+        console.error(error);
+        hideAllMsgs("review");
+        showMsg("reviewError", "error");
+        return;
+    }
+
+    // Add to page immediately
+    let stars = "★".repeat(rating) + "☆".repeat(5 - rating);
+    let grid  = document.getElementById("reviewGrid");
+    let card  = document.createElement("div");
+    card.className = "review-card";
+    card.innerHTML =
+        '<div class="stars">' + stars + '</div>' +
+        (bike ? '<p style="font-size:12px;color:#ff6600;font-weight:600;margin-bottom:8px;">' + escapeHtml(bike) + '</p>' : '') +
+        '<p>' + escapeHtml(comment) + '</p>' +
+        '<div class="reviewer-name">— ' + escapeHtml(name) + '</div>';
+    grid.appendChild(card);
+
+    hideAllMsgs("review");
+    showMsg("reviewSuccess", "success");
+
+    setTimeout(function(){
+        document.getElementById("reviewName").value = "";
+        document.getElementById("reviewComment").value = "";
+        document.getElementById("reviewBike").value = "";
+        document.querySelectorAll('input[name="rating"]').forEach(function(r){ r.checked = false; });
+        hideAllMsgs("review");
+        closeModal("reviewModal");
+    }, 2500);
+}
+
+function escapeHtml(text){
+    let div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+}
+
+/* =============================================
+   LOAD REVIEWS FROM SUPABASE ON PAGE LOAD
+============================================= */
+async function loadReviews(){
+    const { data, error } = await db
+        .from('reviews')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+    if(error || !data) return;
+
+    let grid = document.getElementById("reviewGrid");
+
+    data.forEach(function(review){
+        let stars = "★".repeat(review.rating) + "☆".repeat(5 - review.rating);
+        let card  = document.createElement("div");
+        card.className = "review-card";
+        card.innerHTML =
+            '<div class="stars">' + stars + '</div>' +
+            (review.motorcycle ? '<p style="font-size:12px;color:#ff6600;font-weight:600;margin-bottom:8px;">' + escapeHtml(review.motorcycle) + '</p>' : '') +
+            '<p>' + escapeHtml(review.comment) + '</p>' +
+            '<div class="reviewer-name">— ' + escapeHtml(review.reviewer_name) + '</div>';
+        grid.appendChild(card);
+    });
+}
+
+// Load reviews when page loads
+window.addEventListener('load', loadReviews);
+
+</script>
+
+</body>
+</html>

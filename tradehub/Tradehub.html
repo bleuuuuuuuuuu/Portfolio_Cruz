@@ -1,0 +1,2725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TradeHub — Buy, Sell & Trade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --black: #0a0a0a; --black2: #111111; --black3: #1a1a1a; --black4: #222222; --black5: #2d2d2d;
+    --orange: #ff6b1a; --orange2: #e85a0a; --orange3: #ff8c4a;
+    --orange-glow: rgba(255,107,26,0.15); --orange-glow2: rgba(255,107,26,0.08);
+    --white: #ffffff; --white2: #f0f0f0; --gray: #888888; --gray2: #555555; --gray3: #333333;
+    --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
+    --radius: 10px; --radius-lg: 16px; --transition: 0.2s ease;
+    --nav-h: 56px;
+    --bottom-nav-h: 60px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--black); color: var(--white); min-height: 100vh; overflow-x: hidden; }
+  h1,h2,h3,h4,h5 { font-family: 'Syne', sans-serif; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: 'DM Sans', sans-serif; cursor: pointer; border: none; outline: none; }
+  input, select, textarea { font-family: 'DM Sans', sans-serif; outline: none; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--black2); }
+  ::-webkit-scrollbar-thumb { background: var(--black5); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+
+  /* ============================================================
+     NAVBAR
+  ============================================================ */
+  .navbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,10,0.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--black4);
+    height: var(--nav-h); display: flex; align-items: center; padding: 0 16px; gap: 12px;
+  }
+  .navbar-brand {
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
+    color: var(--white); display: flex; align-items: center; gap: 6px;
+    white-space: nowrap; cursor: pointer; flex-shrink: 0;
+  }
+  .navbar-brand span { color: var(--orange); }
+  .navbar-search { flex: 1; max-width: 400px; position: relative; }
+  .navbar-search input {
+    width: 100%; background: var(--black3); border: 1px solid var(--black5);
+    border-radius: 8px; padding: 8px 12px 8px 34px; color: var(--white);
+    font-size: 14px; transition: border-color var(--transition);
+  }
+  .navbar-search input:focus { border-color: var(--orange); }
+  .navbar-search input::placeholder { color: var(--gray); }
+  .navbar-search .si {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--gray); font-size: 15px; pointer-events: none;
+  }
+  .navbar-nav { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+  .nav-btn {
+    background: none; color: var(--gray); padding: 7px 12px;
+    border-radius: 8px; font-size: 13px; font-weight: 500;
+    transition: all var(--transition); white-space: nowrap;
+  }
+  .nav-btn:hover, .nav-btn.active { color: var(--white); background: var(--black3); }
+  .nav-btn.cta { background: var(--orange); color: var(--white); padding: 7px 14px; }
+  .nav-btn.cta:hover { background: var(--orange2); }
+  /* hide desktop-only nav links on mobile */
+  .nav-desktop-links { display: flex; gap: 4px; }
+  .nav-avatar {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; cursor: pointer; transition: opacity var(--transition);
+    flex-shrink: 0;
+  }
+  .nav-avatar:hover { opacity: 0.8; }
+  /* Hamburger / mobile menu button */
+  .nav-mobile-menu-btn {
+    display: none; width: 36px; height: 36px; background: var(--black3);
+    border-radius: 8px; flex-direction: column; align-items: center; justify-content: center;
+    gap: 5px; cursor: pointer; border: 1px solid var(--black5); flex-shrink: 0;
+  }
+  .nav-mobile-menu-btn span {
+    display: block; width: 18px; height: 2px; background: var(--white);
+    border-radius: 2px; transition: all 0.2s;
+  }
+  /* Mobile search toggle */
+  .nav-search-btn {
+    display: none; width: 34px; height: 34px; background: var(--black3);
+    border-radius: 8px; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; border: 1px solid var(--black5); flex-shrink: 0;
+  }
+  /* Mobile slide-down search bar */
+  .mobile-search-bar {
+    display: none; position: fixed; top: var(--nav-h); left: 0; right: 0;
+    z-index: 999; background: var(--black2); border-bottom: 1px solid var(--black4);
+    padding: 10px 14px;
+  }
+  .mobile-search-bar.open { display: flex; }
+  .mobile-search-bar input {
+    flex: 1; background: var(--black3); border: 1px solid var(--black5);
+    border-radius: 8px; padding: 9px 12px; color: var(--white); font-size: 14px;
+  }
+  .mobile-search-bar input:focus { border-color: var(--orange); outline: none; }
+  .mobile-search-bar button {
+    margin-left: 8px; background: var(--orange); color: white;
+    padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  }
+
+  /* ============================================================
+     BOTTOM NAV (Mobile only)
+  ============================================================ */
+  .bottom-nav {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 1000; background: rgba(10,10,10,0.97); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--black4); height: var(--bottom-nav-h);
+    align-items: center; justify-content: space-around; padding: 0 4px;
+  }
+  .bottom-nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    flex: 1; padding: 6px 4px; cursor: pointer; color: var(--gray);
+    font-size: 10px; font-weight: 600; transition: color var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bottom-nav-item .bn-icon { font-size: 20px; line-height: 1; }
+  .bottom-nav-item.active { color: var(--orange); }
+  .bottom-nav-item:active { opacity: 0.7; }
+
+  /* ============================================================
+     MOBILE DRAWER MENU
+  ============================================================ */
+  .mobile-drawer-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1500;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  }
+  .mobile-drawer-overlay.open { display: block; }
+  .mobile-drawer {
+    position: fixed; top: 0; right: -280px; bottom: 0; width: 280px;
+    z-index: 1501; background: var(--black2); border-left: 1px solid var(--black5);
+    transition: right 0.28s cubic-bezier(0.4,0,0.2,1); overflow-y: auto;
+    padding: 0 0 20px;
+  }
+  .mobile-drawer.open { right: 0; }
+  .drawer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px; border-bottom: 1px solid var(--black4); margin-bottom: 8px;
+  }
+  .drawer-close {
+    width: 32px; height: 32px; background: var(--black3); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; color: var(--gray);
+  }
+  .drawer-item {
+    display: flex; align-items: center; gap: 12px; padding: 13px 18px;
+    font-size: 15px; color: var(--white2); cursor: pointer;
+    transition: background var(--transition); border-radius: 8px; margin: 2px 8px;
+  }
+  .drawer-item:hover, .drawer-item:active { background: var(--black3); color: var(--white); }
+  .drawer-item .di { font-size: 18px; width: 24px; text-align: center; }
+  .drawer-divider { border: none; border-top: 1px solid var(--black4); margin: 10px 16px; }
+  .drawer-user-info {
+    margin: 8px 12px; background: var(--black3); border-radius: var(--radius);
+    padding: 14px; display: flex; align-items: center; gap: 12px;
+  }
+  .drawer-cta { margin: 8px 12px; }
+  .drawer-cta button { width: 100%; padding: 12px; border-radius: var(--radius); font-size: 14px; font-weight: 700; }
+
+  /* ============================================================
+     APP MAIN
+  ============================================================ */
+  .app-main {
+    padding-top: var(--nav-h); min-height: 100vh;
+  }
+  .sidebar-layout { display: flex; min-height: calc(100vh - var(--nav-h)); }
+
+  /* ============================================================
+     SIDEBAR (Desktop)
+  ============================================================ */
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: var(--black2);
+    border-right: 1px solid var(--black4); padding: 20px 14px;
+    position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto;
+  }
+  .sidebar-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--gray); margin-bottom: 8px; padding: 0 8px;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px;
+    border-radius: 8px; font-size: 14px; color: var(--gray); cursor: pointer;
+    transition: all var(--transition); margin-bottom: 2px;
+  }
+  .sidebar-item:hover, .sidebar-item.active { background: var(--black3); color: var(--white); }
+  .sidebar-item.active { color: var(--orange); }
+  .sidebar-icon { font-size: 15px; width: 20px; text-align: center; }
+  .sidebar-count {
+    margin-left: auto; background: var(--black4); color: var(--gray);
+    font-size: 11px; padding: 2px 7px; border-radius: 20px;
+  }
+  .sidebar-divider { border: none; border-top: 1px solid var(--black4); margin: 12px 0; }
+
+  /* Mobile filter toggle */
+  .mobile-filter-toggle {
+    display: none; align-items: center; gap: 8px; padding: 9px 14px;
+    background: var(--black3); border: 1px solid var(--black5); border-radius: var(--radius);
+    font-size: 14px; font-weight: 600; color: var(--white); cursor: pointer;
+    margin-bottom: 14px; width: 100%;
+  }
+  /* Mobile filter panel (drawer-style) */
+  .mobile-filter-overlay {
+    display: none; position: fixed; inset: 0; z-index: 1200;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  }
+  .mobile-filter-overlay.open { display: block; }
+  .mobile-filter-drawer {
+    position: fixed; bottom: -100%; left: 0; right: 0; max-height: 85vh;
+    z-index: 1201; background: var(--black2); border-radius: 20px 20px 0 0;
+    border-top: 1px solid var(--black5); transition: bottom 0.3s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto; padding-bottom: 32px;
+  }
+  .mobile-filter-drawer.open { bottom: 0; }
+  .filter-drawer-handle {
+    display: flex; justify-content: center; padding: 12px 0 4px;
+    cursor: pointer;
+  }
+  .filter-drawer-handle::after {
+    content: ''; display: block; width: 40px; height: 4px;
+    background: var(--gray3); border-radius: 2px;
+  }
+  .filter-drawer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 18px 14px; border-bottom: 1px solid var(--black4);
+  }
+  .filter-drawer-content { padding: 16px 18px; }
+
+  /* ============================================================
+     PAGE CONTENT
+  ============================================================ */
+  .page-content { flex: 1; padding: 22px 20px; overflow-y: auto; min-width: 0; }
+  .page-full { padding: 22px 20px; }
+
+  /* ============================================================
+     HERO
+  ============================================================ */
+  .hero {
+    position: relative; background: var(--black2); border-radius: var(--radius-lg);
+    padding: 40px 32px; overflow: hidden; margin-bottom: 28px;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(255,107,26,0.1), transparent);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--orange-glow); border: 1px solid rgba(255,107,26,0.3);
+    color: var(--orange3); font-size: 12px; font-weight: 600;
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .hero h1 { font-size: 36px; font-weight: 800; line-height: 1.1; margin-bottom: 10px; }
+  .hero h1 span { color: var(--orange); }
+  .hero p { font-size: 15px; color: var(--gray); line-height: 1.6; margin-bottom: 22px; }
+  .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--orange); color: var(--white); padding: 11px 22px;
+    border-radius: var(--radius); font-size: 14px; font-weight: 600;
+    transition: all var(--transition); display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--orange2); transform: translateY(-1px); }
+  .btn-secondary {
+    background: var(--black3); color: var(--white); border: 1px solid var(--black5);
+    padding: 11px 22px; border-radius: var(--radius); font-size: 14px; font-weight: 500;
+    transition: all var(--transition); display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-secondary:hover { border-color: var(--orange); color: var(--orange); }
+
+  /* ============================================================
+     SECTIONS
+  ============================================================ */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
+  }
+  .section-title { font-size: 17px; font-weight: 700; }
+  .section-link { font-size: 13px; color: var(--orange); cursor: pointer; transition: opacity var(--transition); }
+  .section-link:hover { opacity: 0.75; }
+  .cat-pills { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; margin-bottom: 20px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .cat-pills::-webkit-scrollbar { display: none; }
+  .cat-pill {
+    display: flex; align-items: center; gap: 5px; background: var(--black3);
+    border: 1px solid var(--black5); color: var(--gray); padding: 7px 13px;
+    border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: all var(--transition); white-space: nowrap; flex-shrink: 0;
+  }
+  .cat-pill:hover, .cat-pill.active { background: var(--orange-glow); border-color: var(--orange); color: var(--orange); }
+
+  /* ============================================================
+     PRODUCT GRID & CARDS
+  ============================================================ */
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .product-card {
+    background: var(--black2); border: 1px solid var(--black4);
+    border-radius: var(--radius-lg); overflow: hidden; cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .product-card:hover { border-color: var(--orange); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(255,107,26,0.12); }
+  .product-img {
+    width: 100%; aspect-ratio: 4/3; background: var(--black3);
+    position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+  }
+  .product-img img { width: 100%; height: 100%; object-fit: cover; }
+  .product-img-placeholder { font-size: 44px; opacity: 0.25; }
+  .product-badge {
+    position: absolute; top: 8px; left: 8px; padding: 3px 8px;
+    border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase;
+  }
+  .badge-sell { background: rgba(255,107,26,0.2); color: var(--orange3); border: 1px solid rgba(255,107,26,0.3); }
+  .badge-trade { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .badge-buy { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .badge-sold { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .product-info { padding: 12px 14px; }
+  .product-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .product-meta { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--gray); margin-bottom: 7px; flex-wrap: wrap; }
+  .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--gray3); }
+  .product-price { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--orange); margin-bottom: 7px; }
+  .price-note { font-size: 11px; color: var(--gray); font-weight: 400; font-family: 'DM Sans', sans-serif; }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; }
+  .product-seller { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray); }
+  .seller-av {
+    width: 22px; height: 22px; border-radius: 50%; background: var(--orange);
+    display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0;
+  }
+  .trade-ok { font-size: 11px; color: #4ade80; }
+
+  /* ============================================================
+     EMPTY / LOADING
+  ============================================================ */
+  .empty-state { text-align: center; padding: 52px 20px; color: var(--gray); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.25; }
+  .empty-state p { font-size: 15px; font-weight: 600; margin-bottom: 6px; color: var(--white); }
+  .empty-state small { font-size: 13px; opacity: 0.7; }
+
+  /* ============================================================
+     FILTER PANEL
+  ============================================================ */
+  .filter-panel {
+    background: var(--black2); border: 1px solid var(--black4);
+    border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 18px;
+    display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;
+  }
+  .filter-panel .form-group { margin-bottom: 0; }
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    display: block; font-size: 11px; font-weight: 700; color: var(--gray);
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; background: var(--black3); border: 1px solid var(--black5);
+    border-radius: var(--radius); padding: 10px 13px; color: var(--white);
+    font-size: 14px; transition: border-color var(--transition);
+    -webkit-appearance: none; appearance: none;
+  }
+  .form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--orange); }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--gray2); }
+  .form-select option { background: var(--black3); }
+  .form-textarea { resize: vertical; min-height: 90px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ============================================================
+     MODALS
+  ============================================================ */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.88);
+    display: flex; align-items: flex-end; justify-content: center; padding: 0;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--black2); border: 1px solid var(--black5);
+    border-radius: 20px 20px 0 0; width: 100%; max-width: 100%;
+    max-height: 92vh; overflow-y: auto;
+    transform: translateY(60px); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  /* Drag handle on modals */
+  .modal::before {
+    content: ''; display: block; width: 40px; height: 4px;
+    background: var(--gray3); border-radius: 2px;
+    margin: 12px auto 0;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px 0; margin-bottom: 18px;
+  }
+  .modal-title { font-size: 17px; font-weight: 700; }
+  .modal-close {
+    width: 32px; height: 32px; background: var(--black3); border-radius: 8px;
+    color: var(--gray); font-size: 18px; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; transition: all var(--transition); flex-shrink: 0;
+  }
+  .modal-close:hover { background: var(--black5); color: var(--white); }
+  .modal-body { padding: 0 20px 32px; }
+  .auth-step { display: none; }
+  .auth-step.active { display: block; }
+  .tabs {
+    display: flex; gap: 4px; background: var(--black3);
+    border-radius: 10px; padding: 4px; margin-bottom: 16px;
+  }
+  .tab { flex: 1; text-align: center; padding: 9px 12px; border-radius: 7px; font-size: 13px; font-weight: 500; color: var(--gray); cursor: pointer; transition: all var(--transition); }
+  .tab.active { background: var(--black); color: var(--white); }
+
+  /* ============================================================
+     TABLE / ADMIN
+  ============================================================ */
+  .table-wrapper {
+    background: var(--black2); border: 1px solid var(--black4);
+    border-radius: var(--radius-lg); overflow: hidden;
+  }
+  .table-toolbar {
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+    border-bottom: 1px solid var(--black4); flex-wrap: wrap;
+  }
+  .table-toolbar-title { font-size: 14px; font-weight: 600; margin-right: auto; }
+  .tbl-search {
+    background: var(--black3); border: 1px solid var(--black5);
+    border-radius: 8px; padding: 7px 11px; color: var(--white); font-size: 13px; width: 180px;
+  }
+  .tbl-search::placeholder { color: var(--gray); }
+  .tbl-search:focus { border-color: var(--orange); outline: none; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 1px solid var(--black4); }
+  th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray); white-space: nowrap; }
+  td { padding: 11px 12px; font-size: 13px; color: var(--white2); border-bottom: 1px solid rgba(255,255,255,0.04); }
+  tbody tr:hover td { background: var(--black3); }
+  tbody tr:last-child td { border-bottom: none; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px;
+    border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+  }
+  .chip-green  { background: rgba(34,197,94,0.12);  color: #4ade80;  border: 1px solid rgba(34,197,94,0.25); }
+  .chip-orange { background: rgba(255,107,26,0.12); color: var(--orange3); border: 1px solid rgba(255,107,26,0.25); }
+  .chip-red    { background: rgba(239,68,68,0.12);  color: #f87171;  border: 1px solid rgba(239,68,68,0.25); }
+  .chip-yellow { background: rgba(245,158,11,0.12); color: #fbbf24;  border: 1px solid rgba(245,158,11,0.25); }
+  .chip-blue   { background: rgba(59,130,246,0.12); color: #60a5fa;  border: 1px solid rgba(59,130,246,0.25); }
+  .chip-gray   { background: rgba(136,136,136,0.12);color: var(--gray); border: 1px solid rgba(136,136,136,0.25); }
+  .action-btn {
+    padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all var(--transition); display: inline-flex; align-items: center; gap: 4px;
+  }
+  .btn-edit    { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+  .btn-edit:hover { background: rgba(59,130,246,0.25); }
+  .btn-delete  { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .btn-delete:hover { background: rgba(239,68,68,0.25); }
+  .btn-approve { background: rgba(34,197,94,0.12);  color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+  .btn-approve:hover { background: rgba(34,197,94,0.25); }
+  .btn-suspend { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+  .btn-suspend:hover { background: rgba(245,158,11,0.25); }
+  .pagination {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; border-top: 1px solid var(--black4); font-size: 13px; color: var(--gray);
+  }
+  .page-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+  .page-btn {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border-radius: 7px; background: var(--black3); color: var(--gray); font-size: 13px;
+    cursor: pointer; transition: all var(--transition); border: 1px solid transparent;
+  }
+  .page-btn:hover { color: var(--white); background: var(--black5); }
+  .page-btn.active { background: var(--orange); color: var(--white); border-color: var(--orange); }
+
+  /* ============================================================
+     TOAST
+  ============================================================ */
+  .toast-container {
+    position: fixed; bottom: 80px; right: 16px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast {
+    background: var(--black2); border: 1px solid var(--black5); border-radius: 12px;
+    padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 14px;
+    min-width: 240px; max-width: 320px; animation: toastIn 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .toast-icon { font-size: 17px; flex-shrink: 0; }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast.error   { border-left: 3px solid var(--danger); }
+  .toast.info    { border-left: 3px solid var(--orange); }
+  @keyframes toastIn { from { opacity:0; transform: translateX(20px); } to { opacity:1; transform: translateX(0); } }
+
+  /* ============================================================
+     UPLOAD ZONE
+  ============================================================ */
+  .upload-zone {
+    border: 2px dashed var(--black5); border-radius: var(--radius-lg);
+    padding: 24px; text-align: center; cursor: pointer; transition: all var(--transition);
+  }
+  .upload-zone:hover, .upload-zone.drag-over { border-color: var(--orange); background: var(--orange-glow2); }
+  .upload-icon { font-size: 30px; margin-bottom: 8px; }
+  .upload-zone p { font-size: 14px; color: var(--gray); }
+  .upload-zone span { font-size: 12px; color: var(--gray2); }
+  .image-previews { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .image-preview { position: relative; width: 80px; height: 80px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--black5); }
+  .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .image-preview-remove {
+    position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.75);
+    border: none; border-radius: 4px; color: white; font-size: 11px; cursor: pointer;
+    width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ============================================================
+     ITEM DETAIL
+  ============================================================ */
+  .stars { display: flex; gap: 2px; }
+  .star { font-size: 15px; color: var(--gray3); cursor: pointer; }
+  .star.filled { color: var(--orange); }
+  .detail-grid { display: grid; grid-template-columns: 1fr 360px; gap: 22px; align-items: start; }
+  .detail-images {
+    background: var(--black2); border: 1px solid var(--black4);
+    border-radius: var(--radius-lg); aspect-ratio: 4/3;
+    display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
+  }
+  .detail-images img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-thumbs { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; overflow-x: auto; }
+  .detail-thumb {
+    width: 60px; height: 60px; border-radius: 8px; overflow: hidden;
+    border: 2px solid var(--black5); cursor: pointer; flex-shrink: 0;
+  }
+  .detail-thumb.active { border-color: var(--orange); }
+  .detail-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-side {
+    background: var(--black2); border: 1px solid var(--black4);
+    border-radius: var(--radius-lg); padding: 20px; position: sticky; top: 72px;
+  }
+  .detail-price { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; color: var(--orange); margin-bottom: 12px; }
+  .detail-field { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--black4); font-size: 14px; gap: 12px; }
+  .detail-field:last-child { border-bottom: none; }
+  .detail-field-key { color: var(--gray); flex-shrink: 0; }
+  .detail-field-val { font-weight: 500; text-align: right; }
+  .contact-btn {
+    width: 100%; padding: 13px; background: var(--orange); border-radius: var(--radius);
+    font-size: 15px; font-weight: 700; color: white; margin-top: 16px;
+    transition: all var(--transition); display: flex; align-items: center;
+    justify-content: center; gap: 8px; cursor: pointer; border: none;
+  }
+  .contact-btn:hover { background: var(--orange2); }
+
+  /* ============================================================
+     ADMIN SIDEBAR
+  ============================================================ */
+  .admin-sidebar {
+    width: 220px; flex-shrink: 0; background: var(--black2);
+    border-right: 1px solid var(--black4); padding: 0;
+    position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); overflow-y: auto;
+  }
+  .admin-sidebar-header { padding: 16px 16px 12px; border-bottom: 1px solid var(--black4); }
+  .admin-sidebar-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--orange); }
+  .admin-nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 11px 16px;
+    font-size: 14px; color: var(--gray); cursor: pointer; transition: all var(--transition);
+    border-left: 3px solid transparent;
+  }
+  .admin-nav-item:hover { color: var(--white); background: var(--black3); }
+  .admin-nav-item.active { color: var(--orange); background: rgba(255,107,26,0.06); border-left-color: var(--orange); }
+  .admin-nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+  /* ============================================================
+     PROFILE
+  ============================================================ */
+  .profile-header {
+    background: var(--black2); border: 1px solid var(--black4);
+    border-radius: var(--radius-lg); padding: 22px; margin-bottom: 20px;
+    display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+  }
+  .profile-avatar-lg {
+    width: 72px; height: 72px; border-radius: 50%; background: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; flex-shrink: 0;
+  }
+  .profile-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+
+  /* ============================================================
+     REVIEWS & REPORTS
+  ============================================================ */
+  .review-card {
+    background: var(--black2); border: 1px solid var(--black4);
+    border-radius: var(--radius-lg); padding: 14px; margin-bottom: 10px;
+  }
+  .review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .review-text { font-size: 14px; color: var(--white2); line-height: 1.6; }
+  .seller-info {
+    display: flex; align-items: center; gap: 12px; padding: 14px;
+    background: var(--black3); border-radius: var(--radius); margin-bottom: 14px;
+  }
+  .seller-info-avatar {
+    width: 44px; height: 44px; border-radius: 50%; background: var(--orange);
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;
+  }
+  .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+  .toggle {
+    width: 40px; height: 22px; background: var(--black5); border-radius: 11px;
+    position: relative; cursor: pointer; transition: background var(--transition); flex-shrink: 0;
+  }
+  .toggle.on { background: var(--orange); }
+  .toggle::after {
+    content: ''; position: absolute; left: 3px; top: 3px;
+    width: 16px; height: 16px; background: white; border-radius: 50%; transition: left var(--transition);
+  }
+  .toggle.on::after { left: 21px; }
+  .report-card {
+    background: var(--black2); border: 1px solid var(--black4);
+    border-radius: var(--radius-lg); padding: 14px; margin-bottom: 10px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .report-icon {
+    width: 36px; height: 36px; border-radius: 10px; background: rgba(239,68,68,0.12);
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
+    color: #f87171; flex-shrink: 0;
+  }
+
+  /* ============================================================
+     MISC UI
+  ============================================================ */
+  .breadcrumb {
+    display: flex; align-items: center; gap: 6px; font-size: 13px;
+    color: var(--gray); margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .breadcrumb span { color: var(--white); }
+  .breadcrumb .sep { color: var(--gray3); }
+  .chart-bar-wrap { display: flex; align-items: flex-end; gap: 6px; height: 100px; padding-bottom: 22px; }
+  .chart-bar {
+    flex: 1; background: var(--orange-glow); border: 1px solid rgba(255,107,26,0.2);
+    border-radius: 4px 4px 0 0; min-height: 8px; transition: all 0.3s ease; position: relative;
+  }
+  .chart-bar:hover { background: var(--orange); }
+  .chart-bar::after {
+    content: attr(data-val); position: absolute; bottom: -18px; left: 50%;
+    transform: translateX(-50%); font-size: 10px; color: var(--gray); white-space: nowrap;
+  }
+  .price-range-wrap { padding: 4px 8px; }
+  .price-range-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray); margin-bottom: 8px; }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 4px;
+    border-radius: 2px; background: var(--black5); outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 20px; height: 20px; background: var(--orange);
+    border-radius: 50%; cursor: pointer; border: 2px solid var(--black2);
+    box-shadow: 0 0 0 2px var(--orange);
+  }
+  .spinner {
+    width: 30px; height: 30px; border: 3px solid var(--black5); border-top-color: var(--orange);
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin: 40px auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-overlay { display:flex; align-items:center; justify-content:center; padding: 50px; }
+
+  /* ============================================================
+     RESPONSIVE — TABLET (≤ 900px)
+  ============================================================ */
+  @media (max-width: 900px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .detail-side { position: static; }
+  }
+
+  /* ============================================================
+     RESPONSIVE — MOBILE (≤ 768px)
+  ============================================================ */
+  @media (max-width: 768px) {
+    :root { --nav-h: 52px; }
+
+    /* Nav: hide desktop search and links */
+    .navbar { padding: 0 12px; gap: 8px; }
+    .navbar-search { display: none; }
+    .nav-desktop-links { display: none; }
+    .nav-mobile-menu-btn { display: flex; }
+    .nav-search-btn { display: flex; }
+
+    /* Show bottom nav */
+    .bottom-nav { display: flex; }
+    .app-main { padding-bottom: var(--bottom-nav-h); }
+    .toast-container { bottom: calc(var(--bottom-nav-h) + 12px); right: 12px; }
+
+    /* Sidebar hidden on mobile */
+    .sidebar, .admin-sidebar { display: none; }
+
+    /* Hero */
+    .hero { padding: 22px 18px; margin-bottom: 20px; }
+    .hero h1 { font-size: 24px; }
+    .hero p { font-size: 14px; }
+    .hero-actions { gap: 8px; }
+    .btn-primary, .btn-secondary { padding: 10px 16px; font-size: 13px; }
+
+    /* Pages */
+    .page-content { padding: 14px 12px; }
+    .page-full    { padding: 14px 12px; }
+
+    /* Product grid: 2 col */
+    .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .product-info { padding: 10px 12px; }
+    .product-title { font-size: 13px; }
+    .product-price { font-size: 16px; }
+
+    /* Filter panel stacks */
+    .filter-panel { flex-direction: column; gap: 10px; padding: 12px 14px; }
+    .filter-panel .form-group { width: 100%; }
+    .mobile-filter-toggle { display: flex; }
+
+    /* Form row becomes single col */
+    .form-row { grid-template-columns: 1fr; }
+
+    /* Post listing */
+    #page-post-listing .table-wrapper { padding: 16px 14px; }
+
+    /* Admin content */
+    #adminContent { padding: 14px 12px !important; }
+    .table-wrapper { border-radius: var(--radius); }
+    .table-toolbar { flex-wrap: wrap; }
+    .tbl-search { width: 100%; }
+    .admin-tabs-mobile {
+      display: flex; overflow-x: auto; gap: 6px; padding: 12px 14px 8px;
+      border-bottom: 1px solid var(--black4); scrollbar-width: none;
+    }
+    .admin-tabs-mobile::-webkit-scrollbar { display: none; }
+    .admin-tab-pill {
+      flex-shrink: 0; padding: 7px 14px; background: var(--black3);
+      border: 1px solid var(--black5); border-radius: 20px; font-size: 12px;
+      font-weight: 600; color: var(--gray); cursor: pointer; white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .admin-tab-pill.active { background: var(--orange-glow); border-color: var(--orange); color: var(--orange); }
+
+    /* Detail page */
+    .detail-price { font-size: 24px; }
+
+    /* Section titles */
+    .section-title { font-size: 15px; }
+
+    /* Profile header */
+    .profile-header { padding: 16px; gap: 14px; }
+    .profile-avatar-lg { width: 60px; height: 60px; font-size: 20px; }
+    .profile-name { font-size: 18px; }
+
+    /* Modal: full width sheet */
+    .modal-overlay { align-items: flex-end; }
+    .modal { border-radius: 20px 20px 0 0; max-height: 95vh; }
+
+    /* Breadcrumb compact */
+    .breadcrumb { font-size: 12px; }
+
+    /* hide admin panel button in nav on mobile (it's in drawer) */
+    #adminNavBtn { display: none; }
+  }
+
+  /* ============================================================
+     RESPONSIVE — SMALL MOBILE (≤ 420px)
+  ============================================================ */
+  @media (max-width: 420px) {
+    .hero h1 { font-size: 20px; }
+    .product-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .product-img-placeholder { font-size: 32px; }
+    .hero-actions { flex-direction: column; }
+    .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+    .profile-header { flex-direction: column; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-brand" onclick="showPage('home')">💱 Trade<span>Hub</span></div>
+  <!-- Desktop search -->
+  <div class="navbar-search">
+    <span class="si">🔍</span>
+    <input type="text" placeholder="Search listings..." id="globalSearch" oninput="handleGlobalSearch(this.value)">
+  </div>
+  <nav class="navbar-nav" id="navActions">
+    <!-- Desktop nav links -->
+    <div class="nav-desktop-links" id="desktopNavLinks">
+      <button class="nav-btn" onclick="showPage('home')">Home</button>
+      <button class="nav-btn" onclick="showPage('marketplace')">Marketplace</button>
+      <button class="nav-btn" onclick="showPage('categories')">Categories</button>
+    </div>
+    <div id="guestNav" style="display:flex;gap:4px">
+      <button class="nav-btn" onclick="openAuthModal('login')">Login</button>
+      <button class="nav-btn cta" onclick="openAuthModal('register')">Sign Up</button>
+    </div>
+    <div id="userNav" style="display:none;align-items:center;gap:8px">
+      <button class="nav-btn" onclick="requireAuthThen(() => showPage('post-listing'))" style="display:none" id="postItemBtnNav">+ Post Item</button>
+      <div class="nav-avatar" id="navAvatar" onclick="toggleUserMenu()"></div>
+    </div>
+    <button class="nav-btn" id="adminNavBtn" onclick="showPage('admin')" style="color:var(--orange);font-size:13px">⚡ Admin</button>
+    <!-- Mobile only buttons -->
+    <div class="nav-search-btn" id="mobileSearchBtn" onclick="toggleMobileSearch()">🔍</div>
+    <div class="nav-mobile-menu-btn" id="mobileMenuBtn" onclick="openDrawer()">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+</nav>
+
+<!-- MOBILE SEARCH BAR -->
+<div class="mobile-search-bar" id="mobileSearchBar">
+  <input type="text" placeholder="Search listings..." id="mobileSearchInput" oninput="handleGlobalSearch(this.value)">
+  <button onclick="toggleMobileSearch()">✕</button>
+</div>
+
+<!-- MOBILE DRAWER OVERLAY -->
+<div class="mobile-drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<!-- MOBILE DRAWER -->
+<div class="mobile-drawer" id="mobileDrawer">
+  <div class="drawer-header">
+    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800">💱 Trade<span style="color:var(--orange)">Hub</span></div>
+    <div class="drawer-close" onclick="closeDrawer()">✕</div>
+  </div>
+  <!-- User info (when logged in) -->
+  <div id="drawerUserInfo" style="display:none"></div>
+  <!-- Guest CTA (when logged out) -->
+  <div id="drawerGuestCta" class="drawer-cta">
+    <button class="btn-primary" style="width:100%;justify-content:center;margin-bottom:8px" onclick="closeDrawer();openAuthModal('register')">🚀 Sign Up Free</button>
+    <button class="btn-secondary" style="width:100%;justify-content:center" onclick="closeDrawer();openAuthModal('login')">Sign In</button>
+  </div>
+  <hr class="drawer-divider">
+  <div class="drawer-item" onclick="closeDrawer();showPage('home')"><span class="di">🏠</span> Home</div>
+  <div class="drawer-item" onclick="closeDrawer();showPage('marketplace')"><span class="di">🛍️</span> Marketplace</div>
+  <div class="drawer-item" onclick="closeDrawer();showPage('categories')"><span class="di">🗂️</span> Categories</div>
+  <hr class="drawer-divider">
+  <div class="drawer-item" id="drawerPostItem" style="display:none" onclick="closeDrawer();requireAuthThen(() => showPage('post-listing'))"><span class="di">➕</span> Post Item</div>
+  <div class="drawer-item" id="drawerProfile" style="display:none" onclick="closeDrawer();showPage('profile')"><span class="di">👤</span> My Profile</div>
+  <div class="drawer-item" onclick="closeDrawer();showPage('admin')"><span class="di">⚡</span> Admin Panel</div>
+  <hr class="drawer-divider">
+  <div class="drawer-item" id="drawerLogout" style="display:none;color:#f87171" onclick="closeDrawer();logout()"><span class="di">🚪</span> Logout</div>
+</div>
+
+<!-- MOBILE FILTER OVERLAY -->
+<div class="mobile-filter-overlay" id="mobileFilterOverlay" onclick="closeMobileFilter()"></div>
+<div class="mobile-filter-drawer" id="mobileFilterDrawer">
+  <div class="filter-drawer-handle" onclick="closeMobileFilter()"></div>
+  <div class="filter-drawer-header">
+    <div style="font-size:16px;font-weight:700">🎛️ Filters</div>
+    <button class="btn-secondary" style="padding:7px 14px;font-size:13px" onclick="resetFilters();closeMobileFilter()">Reset All</button>
+  </div>
+  <div class="filter-drawer-content">
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-select" id="mobileCatFilter" onchange="filterCat(this.value);renderMobileFilterState()">
+        <option value="all">All Categories</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Listing Type</label>
+      <div class="tabs">
+        <div class="tab active" id="mTypeAll"   onclick="setMobileType('all')">All</div>
+        <div class="tab" id="mTypeSell"  onclick="setMobileType('sell')">Sale</div>
+        <div class="tab" id="mTypeTrade" onclick="setMobileType('trade')">Trade</div>
+        <div class="tab" id="mTypeBuy"   onclick="setMobileType('buy')">Wanted</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Condition</label>
+      <select class="form-select" id="mobileCondFilter" onchange="filterCondition(this.value)">
+        <option value="all">All Conditions</option>
+        <option value="new">Brand New</option>
+        <option value="like-new">Like New</option>
+        <option value="good">Good</option>
+        <option value="fair">Fair</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Max Price</label>
+      <div class="price-range-labels">
+        <span>₱0</span>
+        <span style="color:var(--orange);font-weight:600">₱<span id="priceMaxMobile">100,000</span></span>
+      </div>
+      <input type="range" min="0" max="100000" step="500" value="100000" id="priceRangeMobile"
+        oninput="filterPrice(this.value);document.getElementById('priceRangeInput').value=this.value">
+    </div>
+    <button class="btn-primary" style="width:100%;justify-content:center;margin-top:8px" onclick="closeMobileFilter()">Apply Filters</button>
+  </div>
+</div>
+
+<!-- PAGES -->
+<main class="app-main" id="appMain">
+  <!-- HOME -->
+  <div id="page-home" class="page-full">
+    <div class="hero">
+      <div class="hero-tag">💱 Live Marketplace</div>
+      <h1>Buy, Sell &amp; <span>Trade</span><br>Anything, Anywhere</h1>
+      <p>Post your items, browse listings, and connect directly with buyers and sellers near you.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="showPage('marketplace')">🛍️ Browse Listings</button>
+        <button class="btn-secondary" onclick="requireAuthThen(() => showPage('post-listing'))">+ Post Your Item</button>
+      </div>
+    </div>
+    <div class="section-header">
+      <h2 class="section-title">🗂️ Browse by Category</h2>
+      <div class="section-link" onclick="showPage('categories')">View all →</div>
+    </div>
+    <div class="cat-pills" id="homeCatPills"></div>
+    <div class="section-header">
+      <h2 class="section-title">🔥 Featured Listings</h2>
+      <div class="section-link" onclick="showPage('marketplace')">See all →</div>
+    </div>
+    <div id="homeGrid"><div class="loading-overlay"><div class="spinner"></div></div></div>
+    <div class="section-header" style="margin-top:24px">
+      <h2 class="section-title">🆕 Just Posted</h2>
+    </div>
+    <div id="latestGrid"></div>
+  </div>
+
+  <!-- MARKETPLACE -->
+  <div id="page-marketplace" style="display:none" class="sidebar-layout">
+    <aside class="sidebar">
+      <div class="sidebar-label">Categories</div>
+      <div id="marketSidebar"></div>
+      <hr class="sidebar-divider">
+      <div class="sidebar-label">Listing Type</div>
+      <div class="sidebar-item" onclick="filterType('all')" id="type-all"><span class="sidebar-icon">📦</span> All Types</div>
+      <div class="sidebar-item" onclick="filterType('sell')" id="type-sell"><span class="sidebar-icon">🏷️</span> For Sale</div>
+      <div class="sidebar-item" onclick="filterType('trade')" id="type-trade"><span class="sidebar-icon">🔄</span> For Trade</div>
+      <div class="sidebar-item" onclick="filterType('buy')" id="type-buy"><span class="sidebar-icon">🛒</span> Wanted</div>
+      <hr class="sidebar-divider">
+      <div class="sidebar-label">Max Price</div>
+      <div class="price-range-wrap">
+        <div class="price-range-labels">
+          <span>₱0</span>
+          <span style="color:var(--orange);font-weight:600">₱<span id="priceMax">100,000</span></span>
+        </div>
+        <input type="range" min="0" max="100000" step="500" value="100000" id="priceRangeInput" oninput="filterPrice(this.value)">
+      </div>
+      <hr class="sidebar-divider">
+      <div class="sidebar-label">Condition</div>
+      <div class="sidebar-item" onclick="filterCondition('all')" id="cond-all"><span class="sidebar-icon">🔘</span> All</div>
+      <div class="sidebar-item" onclick="filterCondition('new')" id="cond-new"><span class="sidebar-icon">✨</span> Brand New</div>
+      <div class="sidebar-item" onclick="filterCondition('like-new')" id="cond-like-new"><span class="sidebar-icon">💎</span> Like New</div>
+      <div class="sidebar-item" onclick="filterCondition('good')" id="cond-good"><span class="sidebar-icon">👍</span> Good</div>
+      <div class="sidebar-item" onclick="filterCondition('fair')" id="cond-fair"><span class="sidebar-icon">⚠️</span> Fair</div>
+    </aside>
+    <div class="page-content">
+      <h1 style="font-size:20px;font-weight:800;margin-bottom:14px">🛍️ Marketplace</h1>
+      <!-- Mobile filter toggle (only visible on mobile) -->
+      <button class="mobile-filter-toggle" onclick="openMobileFilter()">🎛️ Filters &amp; Sort <span id="mobileFilterCount" style="margin-left:auto;background:var(--orange);color:white;font-size:10px;padding:2px 7px;border-radius:20px;display:none">0</span></button>
+      <div class="filter-panel">
+        <div class="form-group" style="flex:1;min-width:160px">
+          <label class="form-label">Search</label>
+          <input type="text" class="form-input" placeholder="Search items..." id="mktSearch" oninput="applyFilters()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sort By</label>
+          <select class="form-select" id="sortBy" onchange="applyFilters()">
+            <option value="newest">Newest First</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="popular">Most Popular</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="statusFilter" onchange="applyFilters()">
+            <option value="all">All Status</option>
+            <option value="available">Available</option>
+            <option value="reserved">Reserved</option>
+            <option value="sold">Sold</option>
+          </select>
+        </div>
+      </div>
+      <div id="mktResultCount" style="font-size:13px;color:var(--gray);margin-bottom:12px"></div>
+      <div id="marketplaceGrid"><div class="loading-overlay"><div class="spinner"></div></div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:8px">
+        <span id="mktPaginationInfo" style="font-size:13px;color:var(--gray)"></span>
+        <div class="page-btns" id="mktPageBtns"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITEM DETAIL -->
+  <div id="page-item-detail" style="display:none" class="page-full">
+    <div class="breadcrumb" id="detailBreadcrumb"></div>
+    <div class="detail-grid" id="detailContent"></div>
+    <div style="margin-top:24px" id="reviewSection"></div>
+  </div>
+
+  <!-- CATEGORIES PAGE -->
+  <div id="page-categories" style="display:none" class="page-full">
+    <h1 style="font-size:22px;font-weight:800;margin-bottom:6px">Browse Categories</h1>
+    <p style="color:var(--gray);margin-bottom:22px;font-size:14px">Find exactly what you're looking for</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px" id="catPageGrid"></div>
+  </div>
+
+  <!-- POST LISTING -->
+  <div id="page-post-listing" style="display:none" class="page-full">
+    <div class="breadcrumb">
+      <span onclick="showPage('home')" style="cursor:pointer;color:var(--gray)">Home</span>
+      <span class="sep">›</span>
+      <span id="postListingBc">Post New Listing</span>
+    </div>
+    <div style="max-width:700px">
+      <h1 style="font-size:22px;font-weight:800;margin-bottom:6px" id="postListingTitle">Post a New Item</h1>
+      <p style="color:var(--gray);margin-bottom:22px;font-size:14px">Fill out the details below to list your item</p>
+      <div class="table-wrapper" style="padding:20px">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Item Title *</label>
+            <input type="text" class="form-input" id="lTitle" placeholder="e.g. iPhone 14 Pro Max 256GB">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select class="form-select" id="lCategory"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <textarea class="form-textarea" id="lDesc" placeholder="Describe your item in detail..." style="min-height:110px"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Listing Type *</label>
+            <select class="form-select" id="lType">
+              <option value="sell">Selling</option>
+              <option value="trade">Trading</option>
+              <option value="buy">Wanted to Buy</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Condition *</label>
+            <select class="form-select" id="lCondition">
+              <option value="new">Brand New</option>
+              <option value="like-new">Like New</option>
+              <option value="good">Good</option>
+              <option value="fair">Fair</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Price (₱) *</label>
+            <input type="number" class="form-input" id="lPrice" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location *</label>
+            <input type="text" class="form-input" id="lLocation" placeholder="e.g. Quezon City">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Open to Trade?</label>
+          <div class="toggle-wrap">
+            <div class="toggle" id="tradeToggle" onclick="this.classList.toggle('on')"></div>
+            <span style="font-size:14px;color:var(--gray)">Accept trade offers</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Item Images (max 6)</label>
+          <div class="upload-zone" id="uploadZone"
+            onclick="document.getElementById('imgInput').click()"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleDrop(event)">
+            <div class="upload-icon">📷</div>
+            <p>Tap to upload images</p>
+            <span>PNG, JPG, WEBP up to 5MB each</span>
+          </div>
+          <input type="file" id="imgInput" multiple accept="image/*" style="display:none" onchange="handleImageUpload(this.files)">
+          <div class="image-previews" id="imagePreviews"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="btn-primary" style="flex:1;justify-content:center" onclick="submitListing()">📤 Post Listing</button>
+          <button class="btn-secondary" onclick="cancelPostListing()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div id="page-profile" style="display:none" class="page-full">
+    <div id="profileContent"></div>
+  </div>
+
+  <!-- ORDER PAGE -->
+  <div id="page-order" style="display:none" class="page-full">
+    <div class="breadcrumb">
+      <span onclick="showPage('marketplace')" style="cursor:pointer;color:var(--gray)">Marketplace</span>
+      <span class="sep">›</span><span>Submit Offer</span>
+    </div>
+    <div style="max-width:620px">
+      <h1 style="font-size:22px;font-weight:800;margin-bottom:6px">Submit an Offer</h1>
+      <p style="color:var(--gray);margin-bottom:20px;font-size:14px">Fill in your details to send an offer to the seller</p>
+      <div id="orderItemPreview" style="margin-bottom:20px"></div>
+      <div class="table-wrapper" style="padding:20px">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Your Name *</label>
+            <input type="text" class="form-input" id="oName">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Number *</label>
+            <input type="tel" class="form-input" id="oPhone" placeholder="09XX-XXX-XXXX">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input type="email" class="form-input" id="oEmail">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Offer Type *</label>
+          <div class="tabs">
+            <div class="tab active" id="offerBuy" onclick="selectOfferType('buy')">💸 Buy</div>
+            <div class="tab" id="offerTrade" onclick="selectOfferType('trade')">🔄 Trade</div>
+          </div>
+        </div>
+        <div class="form-group" id="offerPriceGroup">
+          <label class="form-label">Your Offer Amount (₱)</label>
+          <input type="number" class="form-input" id="oOfferPrice" placeholder="Enter your offer" min="0">
+        </div>
+        <div class="form-group" id="offerTradeGroup" style="display:none">
+          <label class="form-label">Trade Item Details</label>
+          <textarea class="form-textarea" id="oTradeDetails" placeholder="Describe what you're offering in exchange..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Meetup / Delivery</label>
+          <select class="form-select" id="oMeetup">
+            <option value="meetup">In-Person Meetup</option>
+            <option value="delivery">Delivery / Courier</option>
+            <option value="both">Either Works</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message to Seller</label>
+          <textarea class="form-textarea" id="oMessage" placeholder="Any additional notes or questions..."></textarea>
+        </div>
+        <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitOrder()">📨 Send Offer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="page-admin" style="display:none" class="sidebar-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <div class="admin-sidebar-title">⚡ Admin Panel</div>
+      </div>
+      <div class="admin-nav-item active" onclick="showAdminTab('dashboard')" id="aTab-dashboard"><span class="admin-nav-icon">📊</span> Dashboard</div>
+      <div class="admin-nav-item" onclick="showAdminTab('users')" id="aTab-users"><span class="admin-nav-icon">👥</span> Users</div>
+      <div class="admin-nav-item" onclick="showAdminTab('listings')" id="aTab-listings"><span class="admin-nav-icon">📦</span> Listings</div>
+      <div class="admin-nav-item" onclick="showAdminTab('categories')" id="aTab-categories"><span class="admin-nav-icon">🗂️</span> Categories</div>
+      <div class="admin-nav-item" onclick="showAdminTab('orders')" id="aTab-orders"><span class="admin-nav-icon">📋</span> Orders</div>
+      <div class="admin-nav-item" onclick="showAdminTab('reviews')" id="aTab-reviews"><span class="admin-nav-icon">⭐</span> Reviews</div>
+      <div class="admin-nav-item" onclick="showAdminTab('reports')" id="aTab-reports"><span class="admin-nav-icon">🚩</span> Reports</div>
+      <div style="padding:14px 14px;border-top:1px solid var(--black4);margin-top:12px">
+        <button class="btn-secondary" style="width:100%;font-size:13px;justify-content:center" onclick="showPage('home')">← Back to Site</button>
+      </div>
+    </aside>
+    <div class="page-content" id="adminContent" style="max-width:100%"></div>
+  </div>
+</main>
+
+<!-- BOTTOM NAV (Mobile) -->
+<nav class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-item active" id="bnHome" onclick="bnNav('home')">
+    <div class="bn-icon">🏠</div><span>Home</span>
+  </div>
+  <div class="bottom-nav-item" id="bnMarket" onclick="bnNav('marketplace')">
+    <div class="bn-icon">🛍️</div><span>Browse</span>
+  </div>
+  <div class="bottom-nav-item" id="bnPost" onclick="requireAuthThen(() => bnNav('post-listing'))">
+    <div class="bn-icon" style="font-size:26px;background:var(--orange);border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;margin-top:-12px;box-shadow:0 4px 16px rgba(255,107,26,0.4)">➕</div>
+    <span>Post</span>
+  </div>
+  <div class="bottom-nav-item" id="bnCat" onclick="bnNav('categories')">
+    <div class="bn-icon">🗂️</div><span>Categories</span>
+  </div>
+  <div class="bottom-nav-item" id="bnProfile" onclick="STATE.currentUser ? bnNav('profile') : openAuthModal('login')">
+    <div class="bn-icon">👤</div><span id="bnProfileLabel">Account</span>
+  </div>
+</nav>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title" id="authModalTitle">Welcome Back 👋</div>
+      <div class="modal-close" onclick="closeModal('authModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="auth-step active" id="stepLogin">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPass" placeholder="••••••••">
+        </div>
+        <div id="loginError" style="font-size:13px;color:var(--danger);margin-bottom:12px;display:none"></div>
+        <button class="btn-primary" style="width:100%;justify-content:center;padding:13px" onclick="handleLogin()">Sign In</button>
+        <p style="text-align:center;font-size:13px;color:var(--gray);margin-top:14px">
+          Don't have an account? <a onclick="switchAuthStep('register')" style="color:var(--orange);cursor:pointer">Sign Up</a>
+        </p>
+      </div>
+      <div class="auth-step" id="stepRegister">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input type="text" class="form-input" id="regFirst">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input type="text" class="form-input" id="regLast">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-input" id="regEmail">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <input type="password" class="form-input" id="regPass" placeholder="Min 8 characters">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" class="form-input" id="regPhone" placeholder="09XX-XXX-XXXX">
+        </div>
+        <div id="regError" style="font-size:13px;color:var(--danger);margin-bottom:12px;display:none"></div>
+        <button class="btn-primary" style="width:100%;justify-content:center;padding:13px" onclick="handleRegister()">Create Account</button>
+        <p style="text-align:center;font-size:13px;color:var(--gray);margin-top:14px">
+          Already have an account? <a onclick="switchAuthStep('login')" style="color:var(--orange);cursor:pointer">Sign In</a>
+        </p>
+      </div>
+      <div class="auth-step" id="stepSuccess">
+        <div style="text-align:center;padding:24px 0">
+          <div style="font-size:52px;margin-bottom:16px">🎉</div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:8px">Account Created!</div>
+          <div style="font-size:14px;color:var(--gray);margin-bottom:22px" id="successMsg"></div>
+          <button class="btn-primary" style="width:100%;justify-content:center;padding:13px" onclick="switchAuthStep('login')">Sign In Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT MODAL -->
+<div class="modal-overlay" id="contactModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Contact Seller 💬</div>
+      <div class="modal-close" onclick="closeModal('contactModal')">✕</div>
+    </div>
+    <div class="modal-body" id="contactModalBody"></div>
+  </div>
+</div>
+
+<!-- ADD/EDIT CATEGORY MODAL -->
+<div class="modal-overlay" id="addCatModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-header">
+      <div class="modal-title" id="catModalTitle">Add Category</div>
+      <div class="modal-close" onclick="closeModal('addCatModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Category Name *</label>
+        <input type="text" class="form-input" id="catName">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Icon (Emoji)</label>
+        <input type="text" class="form-input" id="catIcon" placeholder="e.g. 👟" maxlength="4">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="catDesc" placeholder="Brief category description..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-primary" style="flex:1;justify-content:center" onclick="saveCategoryForm()">Save Category</button>
+        <button class="btn-secondary" onclick="closeModal('addCatModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MARK STATUS MODAL -->
+<div class="modal-overlay" id="statusModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Update Listing Status</div>
+      <div class="modal-close" onclick="closeModal('statusModal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--gray);margin-bottom:16px">Change the status of your listing</p>
+      <div style="display:flex;flex-direction:column;gap:8px" id="statusOptions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================================
+//  SUPABASE INIT
+// ============================================================
+const SUPABASE_URL  = 'https://clyktxnkkrbrkmvfzvqa.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNseWt0eG5ra3JicmttdmZ6dnFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTY5MTAsImV4cCI6MjA5NTAzMjkxMH0.lMetx2oYdFvr9g04Cv95moGl3YeAi3PXUrjiXQ-L3vE';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ============================================================
+//  APP STATE
+// ============================================================
+const STATE = {
+  currentUser:       null,
+  editingListingId:  null,
+  editingCategoryId: null,
+  selectedItem:      null,
+  currentAdminTab:   'dashboard',
+  currentPage:       'home',
+  currentOrderItemId: null,
+  offerType:         'buy',
+  selectedRating:    0,
+  uploadedImages:    [],
+  categories:        [],
+  listings:          [],
+  users:             [],
+  mktFilter: { cat:'all', type:'all', price:100000, condition:'all', search:'', status:'all', sort:'newest' },
+  mktCurrentPage: 1,
+  itemsPerPage:   12,
+};
+
+// ============================================================
+//  SUPABASE HELPERS
+// ============================================================
+async function dbGet(table, query) {
+  const q = sb.from(table).select(query || '*');
+  return q;
+}
+async function loadCategories() {
+  const { data, error } = await sb.from('categories').select('*').order('id');
+  if (!error && data) STATE.categories = data;
+  return STATE.categories;
+}
+async function loadListings() {
+  const { data, error } = await sb.from('listings').select('*').eq('approved', true).order('date', { ascending: false });
+  if (!error && data) STATE.listings = data;
+  return STATE.listings;
+}
+async function loadUsers() {
+  const { data, error } = await sb.from('users').select('*');
+  if (!error && data) STATE.users = data;
+  return STATE.users;
+}
+function getCat(id)    { return STATE.categories.find(c => c.id == id); }
+function getUser(id)   { return STATE.users.find(u => u.id === id); }
+
+// ============================================================
+//  NAVIGATION
+// ============================================================
+function showPage(page) {
+  document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
+  const el = document.getElementById('page-' + page);
+  if (!el) return;
+  el.style.display = el.classList.contains('sidebar-layout') ? 'flex' : 'block';
+  STATE.currentPage = page;
+  window.scrollTo(0, 0);
+  updateBottomNav(page);
+  switch(page) {
+    case 'home':         renderHome(); break;
+    case 'marketplace':  renderMarketplace(); break;
+    case 'categories':   renderCategoriesPage(); break;
+    case 'post-listing': renderPostListing(); break;
+    case 'admin':        renderAdmin(); break;
+    case 'profile':      renderProfile(); break;
+    case 'order':        renderOrderPage(); break;
+  }
+}
+
+function updateBottomNav(page) {
+  const map = { home:'bnHome', marketplace:'bnMarket', 'post-listing':'bnPost', categories:'bnCat', profile:'bnProfile' };
+  document.querySelectorAll('.bottom-nav-item').forEach(el => el.classList.remove('active'));
+  const key = Object.keys(map).find(k => page === k || page.startsWith(k));
+  if (key && map[key]) { const el = document.getElementById(map[key]); if(el) el.classList.add('active'); }
+}
+
+function bnNav(page) {
+  updateBottomNav(page);
+  showPage(page);
+}
+
+// ============================================================
+//  MOBILE DRAWER
+// ============================================================
+function openDrawer() {
+  document.getElementById('mobileDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  updateDrawerState();
+}
+function closeDrawer() {
+  document.getElementById('mobileDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function updateDrawerState() {
+  const u = STATE.currentUser;
+  const guestEl = document.getElementById('drawerGuestCta');
+  const userInfoEl = document.getElementById('drawerUserInfo');
+  const postEl = document.getElementById('drawerPostItem');
+  const profileEl = document.getElementById('drawerProfile');
+  const logoutEl = document.getElementById('drawerLogout');
+  if (u) {
+    guestEl.style.display = 'none';
+    userInfoEl.style.display = 'block';
+    userInfoEl.innerHTML = `<div class="drawer-user-info">
+      <div class="nav-avatar" style="width:42px;height:42px;font-size:16px">${u.avatar || u.name.slice(0,2).toUpperCase()}</div>
+      <div><div style="font-weight:700;font-size:15px">${escHtml(u.name)}</div><div style="font-size:12px;color:var(--gray)">${escHtml(u.email)}</div></div>
+    </div>`;
+    postEl.style.display = 'flex';
+    profileEl.style.display = 'flex';
+    logoutEl.style.display = 'flex';
+  } else {
+    guestEl.style.display = 'block';
+    userInfoEl.style.display = 'none';
+    postEl.style.display = 'none';
+    profileEl.style.display = 'none';
+    logoutEl.style.display = 'none';
+  }
+}
+
+// ============================================================
+//  MOBILE SEARCH
+// ============================================================
+function toggleMobileSearch() {
+  const bar = document.getElementById('mobileSearchBar');
+  bar.classList.toggle('open');
+  if (bar.classList.contains('open')) {
+    document.getElementById('mobileSearchInput').focus();
+  }
+}
+
+// ============================================================
+//  MOBILE FILTER DRAWER
+// ============================================================
+function openMobileFilter() {
+  // sync category options
+  const catSel = document.getElementById('mobileCatFilter');
+  if (catSel && STATE.categories.length > 0) {
+    const existing = catSel.querySelectorAll('option:not([value="all"])');
+    existing.forEach(o => o.remove());
+    STATE.categories.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id; opt.textContent = `${c.icon} ${c.name}`;
+      catSel.appendChild(opt);
+    });
+    catSel.value = STATE.mktFilter.cat === 'all' ? 'all' : STATE.mktFilter.cat;
+  }
+  const priceEl = document.getElementById('priceRangeMobile');
+  if (priceEl) { priceEl.value = STATE.mktFilter.price; document.getElementById('priceMaxMobile').textContent = Number(STATE.mktFilter.price).toLocaleString(); }
+  document.getElementById('mobileFilterOverlay').classList.add('open');
+  document.getElementById('mobileFilterDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileFilter() {
+  document.getElementById('mobileFilterOverlay').classList.remove('open');
+  document.getElementById('mobileFilterDrawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function setMobileType(type) {
+  ['all','sell','trade','buy'].forEach(t => {
+    const el = document.getElementById('mType' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (el) el.classList.toggle('active', t === type);
+  });
+  filterType(type);
+}
+function resetFilters() {
+  STATE.mktFilter = { cat:'all', type:'all', price:100000, condition:'all', search:'', status:'all', sort:'newest' };
+  STATE.mktCurrentPage = 1;
+  const pi = document.getElementById('priceRangeInput'); if (pi) pi.value = 100000;
+  const pm = document.getElementById('priceRangeMobile'); if (pm) pm.value = 100000;
+  document.getElementById('priceMax').textContent = '100,000';
+  const pmEl = document.getElementById('priceMaxMobile'); if (pmEl) pmEl.textContent = '100,000';
+  const ss = document.getElementById('statusFilter'); if (ss) ss.value = 'all';
+  const sb2 = document.getElementById('sortBy'); if (sb2) sb2.value = 'newest';
+  const ms = document.getElementById('mktSearch'); if (ms) ms.value = '';
+  applyFilters();
+}
+function renderMobileFilterState() {}
+
+// ============================================================
+//  HOME
+// ============================================================
+async function renderHome() {
+  await Promise.all([loadCategories(), loadListings(), loadUsers()]);
+  document.getElementById('homeCatPills').innerHTML = STATE.categories.map(c => {
+    const cnt = STATE.listings.filter(l => l.cat == c.id).length;
+    return `<div class="cat-pill" onclick="filterByCat(${c.id})">${c.icon} ${c.name} <span style="font-size:11px;opacity:0.6">(${cnt})</span></div>`;
+  }).join('');
+  const homeGridEl   = document.getElementById('homeGrid');
+  const latestGridEl = document.getElementById('latestGrid');
+  if (STATE.listings.length === 0) {
+    homeGridEl.innerHTML  = `<div class="empty-state"><div class="empty-icon">🛍️</div><p>No listings yet</p><small>Be the first to post an item!</small></div>`;
+    latestGridEl.innerHTML = '';
+    return;
+  }
+  const featured = [...STATE.listings].sort((a,b) => (b.views||0) - (a.views||0)).slice(0, 6);
+  homeGridEl.innerHTML = `<div class="product-grid">${featured.map(renderCard).join('')}</div>`;
+  const latest = [...STATE.listings].slice(0, 4);
+  latestGridEl.innerHTML = `<div class="product-grid">${latest.map(renderCard).join('')}</div>`;
+}
+
+function filterByCat(catId) {
+  STATE.mktFilter.cat = catId;
+  STATE.mktCurrentPage = 1;
+  showPage('marketplace');
+}
+
+// ============================================================
+//  PRODUCT CARD
+// ============================================================
+function renderCard(item) {
+  const cat    = getCat(item.cat);
+  const seller = getUser(item.seller);
+  const icon   = cat ? cat.icon : '📦';
+  let imgHtml  = item.images && item.images.length > 0
+    ? `<img src="${item.images[0]}" alt="${escHtml(item.title)}" loading="lazy">`
+    : `<div class="product-img-placeholder">${icon}</div>`;
+  const badgeClass = { sell:'badge-sell', trade:'badge-trade', buy:'badge-buy' }[item.type] || 'badge-sell';
+  const badgeText  = { sell:'For Sale',  trade:'For Trade',   buy:'Wanted'    }[item.type] || 'Item';
+  const statusBadge = item.status !== 'available'
+    ? `<div class="product-badge badge-${item.status}" style="left:auto;right:8px">${item.status}</div>` : '';
+  const sellerInitials = seller ? (seller.avatar || seller.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)) : '?';
+  return `
+  <div class="product-card" onclick="viewItem(${item.id})">
+    <div class="product-img">${imgHtml}<div class="product-badge ${badgeClass}">${badgeText}</div>${statusBadge}</div>
+    <div class="product-info">
+      <div class="product-title">${escHtml(item.title)}</div>
+      <div class="product-meta">
+        <span>${cat ? cat.name : 'Misc'}</span><span class="dot"></span>
+        <span>${condLabel(item.condition)}</span><span class="dot"></span>
+        <span>📍 ${escHtml(item.location || '')}</span>
+      </div>
+      <div class="product-price">₱${Number(item.price||0).toLocaleString()}${item.type==='trade'?'<span class="price-note"> or Trade</span>':''}</div>
+      <div class="product-footer">
+        <div class="product-seller"><div class="seller-av">${sellerInitials}</div>${seller ? escHtml(seller.name.split(' ')[0]) : 'Unknown'}</div>
+        ${item.open_to_trade ? '<div class="trade-ok">🔄 Trade OK</div>' : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function condLabel(c) {
+  return { new:'New', 'like-new':'Like New', good:'Good', fair:'Fair' }[c] || (c||'');
+}
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+//  MARKETPLACE
+// ============================================================
+async function renderMarketplace() {
+  await Promise.all([loadCategories(), loadListings(), loadUsers()]);
+  const sb2 = document.getElementById('marketSidebar');
+  sb2.innerHTML = `<div class="sidebar-item ${STATE.mktFilter.cat==='all'?'active':''}" onclick="filterCat('all')">
+    <span class="sidebar-icon">🌐</span> All Categories
+    <span class="sidebar-count">${STATE.listings.length}</span>
+  </div>` + STATE.categories.map(c => {
+    const cnt = STATE.listings.filter(l => l.cat == c.id).length;
+    return `<div class="sidebar-item ${STATE.mktFilter.cat==c.id?'active':''}" onclick="filterCat(${c.id})">
+      <span class="sidebar-icon">${c.icon}</span> ${c.name}
+      <span class="sidebar-count">${cnt}</span>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('[id^="type-"]').forEach(el => el.classList.remove('active'));
+  const typeEl = document.getElementById('type-' + STATE.mktFilter.type);
+  if (typeEl) typeEl.classList.add('active');
+  document.querySelectorAll('[id^="cond-"]').forEach(el => el.classList.remove('active'));
+  const condEl = document.getElementById('cond-' + STATE.mktFilter.condition);
+  if (condEl) condEl.classList.add('active');
+  applyFilters();
+}
+
+function filterCat(cat) { STATE.mktFilter.cat = cat; STATE.mktCurrentPage = 1; renderMarketplace(); }
+function filterType(type) {
+  STATE.mktFilter.type = type; STATE.mktCurrentPage = 1;
+  document.querySelectorAll('[id^="type-"]').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('type-' + type); if (el) el.classList.add('active');
+  applyFilters();
+}
+function filterCondition(cond) {
+  STATE.mktFilter.condition = cond; STATE.mktCurrentPage = 1;
+  document.querySelectorAll('[id^="cond-"]').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('cond-' + cond); if (el) el.classList.add('active');
+  applyFilters();
+}
+function filterPrice(val) {
+  STATE.mktFilter.price = parseInt(val);
+  const el = document.getElementById('priceMax'); if (el) el.textContent = Number(STATE.mktFilter.price).toLocaleString();
+  const el2 = document.getElementById('priceMaxMobile'); if (el2) el2.textContent = Number(STATE.mktFilter.price).toLocaleString();
+  applyFilters();
+}
+
+function applyFilters() {
+  const search = (document.getElementById('mktSearch')?.value || '').toLowerCase().trim();
+  const sort   = document.getElementById('sortBy')?.value || 'newest';
+  const status = document.getElementById('statusFilter')?.value || 'all';
+  let items = [...STATE.listings];
+  if (STATE.mktFilter.cat !== 'all') items = items.filter(l => String(l.cat) === String(STATE.mktFilter.cat));
+  if (STATE.mktFilter.type !== 'all') items = items.filter(l => l.type === STATE.mktFilter.type);
+  if (STATE.mktFilter.condition !== 'all') items = items.filter(l => l.condition === STATE.mktFilter.condition);
+  items = items.filter(l => { const p = Number(l.price); return isNaN(p) || p === 0 || p <= Number(STATE.mktFilter.price); });
+  if (status !== 'all') items = items.filter(l => l.status === status);
+  if (search) items = items.filter(l => {
+    const cat    = getCat(l.cat);
+    const seller = getUser(l.seller);
+    return (l.title||'').toLowerCase().includes(search)
+      || (l.description||'').toLowerCase().includes(search)
+      || (cat?.name||'').toLowerCase().includes(search)
+      || (seller?.name||'').toLowerCase().includes(search)
+      || (l.location||'').toLowerCase().includes(search);
+  });
+  if (sort === 'newest')     items.sort((a,b) => new Date(b.date) - new Date(a.date));
+  else if (sort === 'price-low')  items.sort((a,b) => (Number(a.price)||0) - (Number(b.price)||0));
+  else if (sort === 'price-high') items.sort((a,b) => (Number(b.price)||0) - (Number(a.price)||0));
+  else if (sort === 'popular')    items.sort((a,b) => (b.views||0) - (a.views||0));
+  const total = items.length;
+  const pages = Math.max(1, Math.ceil(total / STATE.itemsPerPage));
+  if (STATE.mktCurrentPage > pages) STATE.mktCurrentPage = 1;
+  const start = (STATE.mktCurrentPage - 1) * STATE.itemsPerPage;
+  const paged = items.slice(start, start + STATE.itemsPerPage);
+  const countEl = document.getElementById('mktResultCount');
+  if (countEl) countEl.textContent = `Showing ${paged.length} of ${total} listing${total!==1?'s':''}`;
+  const grid = document.getElementById('marketplaceGrid');
+  if (grid) {
+    if (paged.length === 0) {
+      grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No listings found</p><small>Try adjusting your filters!</small></div>`;
+    } else {
+      grid.innerHTML = `<div class="product-grid">${paged.map(renderCard).join('')}</div>`;
+    }
+  }
+  const infoEl = document.getElementById('mktPaginationInfo');
+  if (infoEl) infoEl.textContent = total > 0 ? `Page ${STATE.mktCurrentPage} of ${pages}` : '';
+  let pBtns = '';
+  for (let i = 1; i <= pages; i++) pBtns += `<div class="page-btn ${i===STATE.mktCurrentPage?'active':''}" onclick="mktGoPage(${i})">${i}</div>`;
+  const pageBtnsEl = document.getElementById('mktPageBtns');
+  if (pageBtnsEl) pageBtnsEl.innerHTML = pBtns;
+}
+function mktGoPage(page) { STATE.mktCurrentPage = page; applyFilters(); window.scrollTo(0,56); }
+
+// ============================================================
+//  ITEM DETAIL
+// ============================================================
+async function viewItem(id) {
+  await Promise.all([loadCategories(), loadListings(), loadUsers()]);
+  const item = STATE.listings.find(l => l.id === id);
+  if (!item) return;
+  STATE.selectedItem = item;
+  await sb.from('listings').update({ views: (item.views||0) + 1 }).eq('id', id);
+  item.views = (item.views||0) + 1;
+  const cat    = getCat(item.cat);
+  const seller = getUser(item.seller);
+  document.getElementById('detailBreadcrumb').innerHTML = `
+    <span onclick="showPage('home')" style="cursor:pointer;color:var(--gray)">Home</span>
+    <span class="sep">›</span>
+    <span onclick="showPage('marketplace')" style="cursor:pointer;color:var(--gray)">Market</span>
+    <span class="sep">›</span>
+    <span>${escHtml(item.title)}</span>`;
+  const typeMap  = { sell:'🏷️ For Sale', trade:'🔄 For Trade', buy:'🛒 Wanted' };
+  const condMap  = { new:'✨ Brand New', 'like-new':'💎 Like New', good:'👍 Good', fair:'⚠️ Fair' };
+  const statusColors = { available:'chip-green', reserved:'chip-yellow', sold:'chip-red' };
+  let mainImgHtml = '';
+  let thumbsHtml  = '';
+  if (item.images && item.images.length > 0) {
+    mainImgHtml = `<img id="detailMainImg" src="${item.images[0]}" alt="${escHtml(item.title)}" style="width:100%;height:100%;object-fit:cover">`;
+    if (item.images.length > 1) {
+      thumbsHtml = `<div class="detail-thumbs">${item.images.map((src,i) =>
+        `<div class="detail-thumb ${i===0?'active':''}" onclick="switchDetailImg(${i}, this)"><img src="${src}" alt="thumb ${i+1}" loading="lazy"></div>`
+      ).join('')}</div>`;
+    }
+  } else {
+    mainImgHtml = `<div class="product-img-placeholder" style="font-size:70px;opacity:0.18">${cat?.icon||'📦'}</div>`;
+  }
+  const sellerInitials = seller ? (seller.avatar || seller.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)) : '?';
+  document.getElementById('detailContent').innerHTML = `
+  <div>
+    <div class="detail-images" id="detailImgBox">${mainImgHtml}</div>
+    ${thumbsHtml}
+    <div style="margin-top:16px">
+      <h2 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray);margin-bottom:8px">About this item</h2>
+      <p style="font-size:14px;line-height:1.7;color:var(--white2)">${escHtml(item.description||'No description provided.').replace(/\n/g,'<br>')}</p>
+    </div>
+  </div>
+  <div>
+    <div class="detail-side">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <span class="chip ${statusColors[item.status]||'chip-gray'}">${item.status}</span>
+        <span class="chip chip-orange">${typeMap[item.type]||item.type}</span>
+        ${item.open_to_trade ? '<span class="chip chip-blue">🔄 Trade Accepted</span>' : ''}
+      </div>
+      <h1 style="font-size:18px;font-weight:800;margin-bottom:8px">${escHtml(item.title)}</h1>
+      <div class="detail-price">₱${Number(item.price||0).toLocaleString()}</div>
+      <div class="detail-field"><span class="detail-field-key">Category</span><span class="detail-field-val">${cat?.icon||''} ${cat?.name||'N/A'}</span></div>
+      <div class="detail-field"><span class="detail-field-key">Condition</span><span class="detail-field-val">${condMap[item.condition]||item.condition||'N/A'}</span></div>
+      <div class="detail-field"><span class="detail-field-key">Location</span><span class="detail-field-val">📍 ${escHtml(item.location||'')}</span></div>
+      <div class="detail-field"><span class="detail-field-key">Posted</span><span class="detail-field-val">${new Date(item.date).toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'})}</span></div>
+      <div class="detail-field"><span class="detail-field-key">Views</span><span class="detail-field-val">👁️ ${item.views}</span></div>
+      <div style="margin-top:14px;padding:12px;background:var(--black3);border-radius:var(--radius)">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gray);margin-bottom:8px">Seller</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="seller-av" style="width:38px;height:38px;font-size:14px">${sellerInitials}</div>
+          <div>
+            <div style="font-weight:600;font-size:14px">${escHtml(seller?.name||'Unknown Seller')}</div>
+            <div style="font-size:12px;color:var(--gray)">Member since ${seller ? new Date(seller.joined).getFullYear() : 'N/A'}</div>
+          </div>
+        </div>
+      </div>
+      ${item.status === 'available' ? `
+        <button class="contact-btn" onclick="openContactModal(${item.id})">💬 Contact Seller</button>
+        <button class="btn-secondary" style="width:100%;margin-top:10px;justify-content:center" onclick="showOrderPage(${item.id})">📝 Make an Offer</button>
+        ${STATE.currentUser && STATE.currentUser.id === item.seller ? `<button class="btn-secondary" style="width:100%;margin-top:10px;justify-content:center" onclick="openStatusModal(${item.id})">🔄 Update Status</button>` : ''}
+      ` : `
+        <div style="text-align:center;padding:14px;color:var(--gray);font-size:14px;margin-top:14px;background:var(--black3);border-radius:var(--radius)">This item is no longer available</div>
+        ${STATE.currentUser && STATE.currentUser.id === item.seller ? `<button class="btn-secondary" style="width:100%;margin-top:10px;justify-content:center" onclick="openStatusModal(${item.id})">🔄 Update Status</button>` : ''}
+      `}
+      <button style="width:100%;margin-top:8px;background:none;color:var(--gray);font-size:13px;padding:8px;border:1px solid var(--black5);border-radius:8px;cursor:pointer;transition:all 0.2s"
+        onmouseover="this.style.borderColor='var(--danger)';this.style.color='#f87171'"
+        onmouseout="this.style.borderColor='var(--black5)';this.style.color='var(--gray)'"
+        onclick="reportItem(${item.id})">🚩 Report Listing</button>
+    </div>
+  </div>`;
+  await renderReviews(item.id);
+  showPage('item-detail');
+}
+
+function switchDetailImg(idx, thumbEl) {
+  const item = STATE.selectedItem;
+  if (!item || !item.images || !item.images[idx]) return;
+  const mainImg = document.getElementById('detailMainImg');
+  if (mainImg) mainImg.src = item.images[idx];
+  document.querySelectorAll('.detail-thumb').forEach(t => t.classList.remove('active'));
+  thumbEl.classList.add('active');
+}
+
+async function renderReviews(itemId) {
+  STATE.selectedRating = 0;
+  const { data: itemReviews } = await sb.from('reviews').select('*').eq('listing_id', itemId).eq('approved', true);
+  const reviews = itemReviews || [];
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((s,r) => s + r.rating, 0) / reviews.length).toFixed(1) : null;
+  document.getElementById('reviewSection').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap">
+      <h2 style="font-size:17px;font-weight:700">⭐ Reviews & Ratings</h2>
+      ${avgRating ? `<div style="background:var(--black3);padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600"><span style="color:var(--orange)">${avgRating}</span><span style="color:var(--gray)"> / 5 (${reviews.length})</span></div>` : ''}
+    </div>
+    ${reviews.length === 0
+      ? '<div class="empty-state" style="padding:28px 0"><div class="empty-icon">💬</div><p>No reviews yet</p><small>Be the first to review!</small></div>'
+      : reviews.map(r => `
+          <div class="review-card">
+            <div class="review-header">
+              <div class="seller-av" style="width:34px;height:34px;font-size:12px">${r.reviewer ? r.reviewer.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '?'}</div>
+              <div><div style="font-weight:600;font-size:14px">${escHtml(r.reviewer||'Anonymous')}</div><div>${'⭐'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div></div>
+              <span style="margin-left:auto;font-size:11px;color:var(--gray)">${r.date}</span>
+            </div>
+            <div class="review-text">${escHtml(r.comment)}</div>
+          </div>`).join('')}
+    <div style="margin-top:18px;background:var(--black2);border:1px solid var(--black4);border-radius:var(--radius-lg);padding:16px">
+      <h3 style="font-size:15px;font-weight:600;margin-bottom:10px">Leave a Review</h3>
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+        <span style="font-size:13px;color:var(--gray)">Rating:</span>
+        ${[1,2,3,4,5].map(s => `<span style="font-size:26px;cursor:pointer;transition:transform 0.1s" id="star-${s}" onclick="setRating(${s})" onmouseover="hoverRating(${s})" onmouseout="hoverRating(0)">☆</span>`).join('')}
+      </div>
+      <textarea class="form-textarea" id="reviewText" placeholder="Share your experience..."></textarea>
+      <button class="btn-primary" style="margin-top:10px" onclick="submitReview(${itemId})">Submit Review</button>
+    </div>`;
+}
+
+function hoverRating(val) {
+  for (let i = 1; i <= 5; i++) {
+    const s = document.getElementById('star-' + i);
+    if (!s) continue;
+    s.textContent = i <= (val || STATE.selectedRating) ? '⭐' : '☆';
+  }
+}
+function setRating(val) {
+  STATE.selectedRating = val;
+  for (let i = 1; i <= 5; i++) { const s = document.getElementById('star-'+i); if(s) s.textContent = i<=val?'⭐':'☆'; }
+}
+
+async function submitReview(itemId) {
+  if (!STATE.selectedRating) { showToast('error','Please select a star rating'); return; }
+  const text = document.getElementById('reviewText')?.value.trim();
+  if (!text) { showToast('error','Please write a review'); return; }
+  const { error } = await sb.from('reviews').insert({
+    reviewer:   STATE.currentUser ? STATE.currentUser.name : 'Anonymous',
+    listing_id: itemId, rating: STATE.selectedRating, comment: text,
+    approved: true, date: todayStr(),
+  });
+  if (error) { showToast('error','Failed to submit review'); return; }
+  showToast('success','Review submitted!');
+  await renderReviews(itemId);
+}
+
+async function reportItem(id) {
+  const item = STATE.listings.find(l => l.id === id);
+  if (!item) return;
+  await sb.from('reports').insert({
+    reporter: STATE.currentUser ? STATE.currentUser.name : 'Guest',
+    listing_id: id, item: item.title, reason: 'User Report',
+    detail: 'Flagged by user from item detail page.', status: 'pending', date: todayStr(),
+  });
+  showToast('info','Report submitted to admin. Thank you!');
+}
+
+function openStatusModal(itemId) {
+  const item = STATE.listings.find(l => l.id === itemId);
+  if (!item) return;
+  const statuses = [
+    { val:'available', label:'✅ Available',  desc:'Item is available for purchase' },
+    { val:'reserved',  label:'🔒 Reserved',   desc:'Item is reserved for a buyer' },
+    { val:'sold',      label:'❌ Sold',        desc:'Item has been sold' },
+  ];
+  document.getElementById('statusOptions').innerHTML = statuses.map(s =>
+    `<button class="btn-secondary" style="width:100%;justify-content:flex-start;padding:12px 14px;${item.status===s.val?'border-color:var(--orange);color:var(--orange)':''}"
+      onclick="setListingStatus(${itemId}, '${s.val}')">
+      <div><div style="font-weight:600">${s.label}</div><div style="font-size:12px;color:var(--gray);font-weight:400">${s.desc}</div></div>
+    </button>`
+  ).join('');
+  showModal('statusModal');
+}
+
+async function setListingStatus(itemId, status) {
+  const { error } = await sb.from('listings').update({ status }).eq('id', itemId);
+  if (error) { showToast('error','Failed to update status'); return; }
+  const item = STATE.listings.find(l => l.id === itemId);
+  if (item) item.status = status;
+  closeModal('statusModal');
+  showToast('success',`Listing marked as ${status}`);
+  viewItem(itemId);
+}
+
+// ============================================================
+//  CATEGORIES PAGE
+// ============================================================
+async function renderCategoriesPage() {
+  await loadCategories(); await loadListings();
+  document.getElementById('catPageGrid').innerHTML = STATE.categories.map(c => {
+    const cnt = STATE.listings.filter(l => l.cat == c.id).length;
+    return `
+    <div onclick="filterByCat(${c.id})" style="background:var(--black2);border:1px solid var(--black4);border-radius:var(--radius-lg);padding:20px;text-align:center;cursor:pointer;transition:all 0.2s"
+      onmouseover="this.style.borderColor='var(--orange)';this.style.transform='translateY(-3px)'"
+      onmouseout="this.style.borderColor='var(--black4)';this.style.transform=''">
+      <div style="font-size:36px;margin-bottom:10px">${c.icon}</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">${escHtml(c.name)}</div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:8px">${escHtml(c.description||'')}</div>
+      <div style="font-size:12px;color:var(--orange);font-weight:600">${cnt} listing${cnt!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+//  POST LISTING
+// ============================================================
+async function renderPostListing() {
+  await loadCategories();
+  const catSel = document.getElementById('lCategory');
+  catSel.innerHTML = STATE.categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+  if (STATE.editingListingId) {
+    const l = STATE.listings.find(x => x.id === STATE.editingListingId);
+    if (!l) { STATE.editingListingId = null; return; }
+    document.getElementById('postListingTitle').textContent = 'Edit Listing';
+    document.getElementById('postListingBc').textContent    = 'Edit Listing';
+    document.getElementById('lTitle').value     = l.title;
+    document.getElementById('lDesc').value      = l.description || '';
+    document.getElementById('lCategory').value  = l.cat;
+    document.getElementById('lType').value      = l.type;
+    document.getElementById('lCondition').value = l.condition;
+    document.getElementById('lPrice').value     = l.price;
+    document.getElementById('lLocation').value  = l.location;
+    const toggle = document.getElementById('tradeToggle');
+    if (l.open_to_trade) toggle.classList.add('on'); else toggle.classList.remove('on');
+    STATE.uploadedImages = l.images ? [...l.images] : [];
+    renderPreviews();
+  } else {
+    document.getElementById('postListingTitle').textContent = 'Post a New Item';
+    document.getElementById('postListingBc').textContent    = 'Post New Listing';
+    ['lTitle','lDesc','lPrice','lLocation'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('tradeToggle').classList.remove('on');
+    STATE.uploadedImages = [];
+    renderPreviews();
+  }
+}
+
+function cancelPostListing() { STATE.editingListingId = null; STATE.uploadedImages = []; showPage('marketplace'); }
+
+function handleImageUpload(files) {
+  const maxImg = 6; const remaining = maxImg - STATE.uploadedImages.length;
+  const toLoad = Array.from(files).slice(0, remaining);
+  if (toLoad.length < files.length) showToast('info',`Max ${maxImg} images. Some were skipped.`);
+  toLoad.forEach(file => {
+    if (file.size > 5 * 1024 * 1024) { showToast('error',`${file.name} is too large (max 5MB)`); return; }
+    const reader = new FileReader();
+    reader.onload = e => { STATE.uploadedImages.push(e.target.result); renderPreviews(); };
+    reader.readAsDataURL(file);
+  });
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  handleImageUpload(e.dataTransfer.files);
+}
+function renderPreviews() {
+  document.getElementById('imagePreviews').innerHTML = STATE.uploadedImages.map((src, i) => `
+    <div class="image-preview">
+      <img src="${src}" alt="Preview ${i+1}" loading="lazy">
+      <button class="image-preview-remove" onclick="removeImage(${i});event.stopPropagation()" title="Remove">✕</button>
+    </div>`).join('');
+}
+function removeImage(i) { STATE.uploadedImages.splice(i,1); renderPreviews(); }
+
+async function submitListing() {
+  const title     = document.getElementById('lTitle').value.trim();
+  const desc      = document.getElementById('lDesc').value.trim();
+  const cat       = parseInt(document.getElementById('lCategory').value);
+  const type      = document.getElementById('lType').value;
+  const condition = document.getElementById('lCondition').value;
+  const price     = parseFloat(document.getElementById('lPrice').value) || 0;
+  const location  = document.getElementById('lLocation').value.trim();
+  const openToTrade = document.getElementById('tradeToggle').classList.contains('on');
+  const images    = [...STATE.uploadedImages];
+  if (!title || !desc || !location) { showToast('error','Please fill all required fields'); return; }
+  if (STATE.editingListingId) {
+    const { error } = await sb.from('listings').update({
+      title, description: desc, cat, type, condition, price, location,
+      open_to_trade: openToTrade, images: images.length > 0 ? images : undefined,
+    }).eq('id', STATE.editingListingId);
+    if (error) { showToast('error','Failed to update listing'); return; }
+    showToast('success','✅ Listing updated!');
+    STATE.editingListingId = null;
+  } else {
+    const { error } = await sb.from('listings').insert({
+      title, description: desc, cat, type, condition, price, location,
+      status: 'available', open_to_trade: openToTrade,
+      seller: STATE.currentUser.id, images, views: 0, approved: true, date: todayStr(),
+    });
+    if (error) { showToast('error','Failed to post listing'); return; }
+    showToast('success','🎉 Listing posted!');
+  }
+  STATE.uploadedImages = [];
+  await loadListings();
+  showPage('marketplace');
+}
+
+// ============================================================
+//  ORDER PAGE
+// ============================================================
+function showOrderPage(itemId) { STATE.currentOrderItemId = itemId; showPage('order'); }
+
+function renderOrderPage() {
+  const item = STATE.listings.find(l => l.id === STATE.currentOrderItemId);
+  if (!item) { document.getElementById('orderItemPreview').innerHTML = ''; return; }
+  const cat = getCat(item.cat);
+  document.getElementById('orderItemPreview').innerHTML = `
+    <div style="background:var(--black2);border:1px solid var(--black4);border-radius:var(--radius-lg);padding:14px;display:flex;align-items:center;gap:12px">
+      ${item.images && item.images.length > 0
+        ? `<img src="${item.images[0]}" style="width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0">`
+        : `<div style="font-size:32px">${cat?.icon||'📦'}</div>`}
+      <div>
+        <div style="font-size:11px;color:var(--gray);margin-bottom:2px">Making offer for</div>
+        <div style="font-size:15px;font-weight:700">${escHtml(item.title)}</div>
+        <div style="color:var(--orange);font-weight:700;font-size:17px">₱${Number(item.price||0).toLocaleString()}</div>
+      </div>
+    </div>`;
+  if (STATE.currentUser) {
+    document.getElementById('oName').value  = STATE.currentUser.name;
+    document.getElementById('oEmail').value = STATE.currentUser.email;
+    document.getElementById('oPhone').value = STATE.currentUser.phone || '';
+  }
+  STATE.offerType = 'buy';
+  document.getElementById('offerBuy').classList.add('active');
+  document.getElementById('offerTrade').classList.remove('active');
+  document.getElementById('offerPriceGroup').style.display  = 'block';
+  document.getElementById('offerTradeGroup').style.display  = 'none';
+}
+
+function selectOfferType(type) {
+  STATE.offerType = type;
+  document.getElementById('offerBuy').classList.toggle('active', type==='buy');
+  document.getElementById('offerTrade').classList.toggle('active', type==='trade');
+  document.getElementById('offerPriceGroup').style.display  = type==='buy'   ? 'block' : 'none';
+  document.getElementById('offerTradeGroup').style.display  = type==='trade' ? 'block' : 'none';
+}
+
+async function submitOrder() {
+  const item   = STATE.listings.find(l => l.id === STATE.currentOrderItemId);
+  const seller = item ? getUser(item.seller) : null;
+  const name   = document.getElementById('oName').value.trim();
+  const email  = document.getElementById('oEmail').value.trim();
+  const phone  = document.getElementById('oPhone').value.trim();
+  if (!name || !email) { showToast('error','Name and email are required'); return; }
+  const { error } = await sb.from('orders').insert({
+    buyer: name, buyer_id: STATE.currentUser?.id || null,
+    listing_id: STATE.currentOrderItemId, item: item?.title || 'Item',
+    seller: seller?.name || 'Seller', seller_id: item?.seller || null,
+    type: STATE.offerType, amount: parseFloat(document.getElementById('oOfferPrice').value) || 0,
+    trade_details: document.getElementById('oTradeDetails').value.trim(),
+    meetup: document.getElementById('oMeetup').value,
+    message: document.getElementById('oMessage').value.trim(),
+    status: 'pending', contact: phone, email, date: todayStr(),
+  });
+  if (error) { showToast('error','Failed to send offer'); return; }
+  showToast('success','✅ Offer sent! The seller will contact you shortly.');
+  showPage('marketplace');
+}
+
+// ============================================================
+//  CONTACT MODAL
+// ============================================================
+function openContactModal(itemId) {
+  const item   = STATE.listings.find(l => l.id === itemId);
+  const seller = getUser(item?.seller);
+  if (!item || !seller) { showToast('error','Seller not found'); return; }
+  const sellerInitials = seller.avatar || seller.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('contactModalBody').innerHTML = `
+    <div class="seller-info">
+      <div class="seller-info-avatar">${sellerInitials}</div>
+      <div><div style="font-weight:600;font-size:15px">${escHtml(seller.name)}</div><div style="font-size:12px;color:var(--gray)">${STATE.listings.filter(l=>l.seller===seller.id).length} listings</div></div>
+    </div>
+    <div style="background:var(--black3);border-radius:var(--radius);padding:14px;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--gray);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Contact Information</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:14px">
+        <div>📱 ${seller.phone ? escHtml(seller.phone) : '<span style="color:var(--gray)">Not provided</span>'}</div>
+        <div>📧 ${escHtml(seller.email)}</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Your Message</label>
+      <textarea class="form-textarea" id="contactMsg">Hi! I'm interested in your listing: ${escHtml(item.title)}. Is it still available?</textarea>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-primary" style="flex:1;justify-content:center" onclick="sendMessage()">📤 Send Message</button>
+      <button class="btn-secondary" onclick="closeModal('contactModal')">Cancel</button>
+    </div>`;
+  showModal('contactModal');
+}
+function sendMessage() { showToast('success','Message sent to seller!'); closeModal('contactModal'); }
+
+// ============================================================
+//  PROFILE PAGE
+// ============================================================
+async function renderProfile() {
+  if (!STATE.currentUser) { showPage('home'); return; }
+  const user = STATE.currentUser;
+  await loadListings();
+  const { data: orders } = await sb.from('orders').select('*').eq('seller_id', user.id);
+  const userListings = STATE.listings.filter(l => l.seller === user.id);
+  const soldCount    = userListings.filter(l => l.status === 'sold').length;
+  const initials     = user.avatar || user.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('profileContent').innerHTML = `
+    <div class="profile-header">
+      <div class="profile-avatar-lg">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div class="profile-name">${escHtml(user.name)}</div>
+        <div style="font-size:12px;color:var(--gray);margin-bottom:8px">📅 Member since ${new Date(user.joined).toLocaleDateString('en-PH',{year:'numeric',month:'long'})}</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div><span style="font-size:17px;font-weight:700">${userListings.length}</span> <span style="color:var(--gray);font-size:12px">Listings</span></div>
+          <div><span style="font-size:17px;font-weight:700">${soldCount}</span> <span style="color:var(--gray);font-size:12px">Sold</span></div>
+          <div><span style="font-size:17px;font-weight:700">${(orders||[]).length}</span> <span style="color:var(--gray);font-size:12px">Offers</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+        <button class="btn-primary" onclick="showPage('post-listing')" style="white-space:nowrap;font-size:13px;padding:9px 16px">+ New Listing</button>
+        <button class="btn-secondary" onclick="showEditProfile()" style="white-space:nowrap;justify-content:center;font-size:13px;padding:9px 16px">✏️ Edit Profile</button>
+      </div>
+    </div>
+    <div id="editProfileSection"></div>
+    <div class="section-header"><h2 class="section-title">My Listings (${userListings.length})</h2></div>
+    ${userListings.length === 0
+      ? `<div class="empty-state"><div class="empty-icon">📦</div><p>No listings yet</p><small>Post your first item to get started!</small></div>`
+      : `<div class="product-grid">${userListings.map(l => `
+          <div>
+            ${renderCard(l)}
+            <div style="display:flex;gap:6px;padding:0 4px 4px;margin-top:6px">
+              <button class="action-btn btn-edit" style="flex:1;justify-content:center" onclick="editListing(${l.id})">✏️ Edit</button>
+              <button class="action-btn btn-suspend" onclick="openStatusModal(${l.id})">🔄</button>
+              <button class="action-btn btn-delete" onclick="deleteListing(${l.id})">🗑️</button>
+            </div>
+          </div>`).join('')}</div>`}`;
+}
+
+function showEditProfile() {
+  const user = STATE.currentUser;
+  document.getElementById('editProfileSection').innerHTML = `
+    <div class="table-wrapper" style="padding:18px;margin-bottom:20px">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:12px">Edit Profile</h3>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="editName" value="${escHtml(user.name)}"></div>
+        <div class="form-group"><label class="form-label">Phone Number</label><input type="tel" class="form-input" id="editPhone" value="${escHtml(user.phone||'')}"></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-primary" onclick="saveProfile()">💾 Save Changes</button>
+        <button class="btn-secondary" onclick="document.getElementById('editProfileSection').innerHTML=''">Cancel</button>
+      </div>
+    </div>`;
+}
+
+async function saveProfile() {
+  const name  = document.getElementById('editName')?.value.trim();
+  const phone = document.getElementById('editPhone')?.value.trim();
+  if (!name) { showToast('error','Name cannot be empty'); return; }
+  const avatar = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  const { error } = await sb.from('users').update({ name, phone, avatar }).eq('id', STATE.currentUser.id);
+  if (error) { showToast('error','Failed to update profile'); return; }
+  STATE.currentUser.name   = name;
+  STATE.currentUser.phone  = phone;
+  STATE.currentUser.avatar = avatar;
+  saveCurrentUser(); updateNav();
+  showToast('success','Profile updated!');
+  renderProfile();
+}
+
+function editListing(id) { STATE.editingListingId = id; showPage('post-listing'); }
+
+async function deleteListing(id) {
+  if (!confirm('Delete this listing? This cannot be undone.')) return;
+  const { error } = await sb.from('listings').delete().eq('id', id);
+  if (error) { showToast('error','Failed to delete listing'); return; }
+  STATE.listings = STATE.listings.filter(l => l.id !== id);
+  showToast('success','Listing deleted');
+  renderProfile();
+}
+
+// ============================================================
+//  AUTH
+// ============================================================
+function openAuthModal(step) { switchAuthStep(step); showModal('authModal'); }
+function switchAuthStep(step) {
+  document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('step' + step.charAt(0).toUpperCase() + step.slice(1));
+  if (el) el.classList.add('active');
+  const titles = { login:'Welcome Back 👋', register:'Create Account 🚀', success:'🎉 Success' };
+  document.getElementById('authModalTitle').textContent = titles[step] || '';
+  ['loginError','regError'].forEach(id => { const el = document.getElementById(id); if(el){el.style.display='none';el.textContent='';} });
+}
+
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  const { data, error } = await sb.from('users').select('*').eq('email', email).single();
+  if (error || !data) { errEl.textContent = 'No account found with this email.'; errEl.style.display='block'; return; }
+  if (data.status === 'suspended') { errEl.textContent = 'Your account has been suspended.'; errEl.style.display='block'; return; }
+  if (data.password !== pass) { errEl.textContent = 'Incorrect password. Please try again.'; errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+  STATE.currentUser = data;
+  saveCurrentUser(); closeModal('authModal'); updateNav();
+  showToast('success',`Welcome back, ${data.name.split(' ')[0]}! 👋`);
+}
+
+async function handleRegister() {
+  const first = document.getElementById('regFirst').value.trim();
+  const last  = document.getElementById('regLast').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('regPass').value;
+  const phone = document.getElementById('regPhone').value.trim();
+  const errEl = document.getElementById('regError');
+  if (!first || !last || !email || !pass) { errEl.textContent='Please fill all required fields.'; errEl.style.display='block'; return; }
+  if (pass.length < 8) { errEl.textContent='Password must be at least 8 characters.'; errEl.style.display='block'; return; }
+  const { data: existing } = await sb.from('users').select('id').eq('email', email).single();
+  if (existing) { errEl.textContent='An account with this email already exists.'; errEl.style.display='block'; return; }
+  const { error } = await sb.from('users').insert({
+    name: `${first} ${last}`, email, password: pass, phone,
+    avatar: `${first[0]}${last[0]}`.toUpperCase(),
+    role: 'user', status: 'active', joined: todayStr(),
+  });
+  if (error) { errEl.textContent='Registration failed. Please try again.'; errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+  document.getElementById('successMsg').textContent = `Account created for ${first}! Please sign in.`;
+  switchAuthStep('success');
+}
+
+function logout() {
+  STATE.currentUser = null;
+  localStorage.removeItem('tradehub_user');
+  updateNav(); showPage('home');
+  showToast('info','Logged out successfully');
+}
+
+function saveCurrentUser() {
+  if (STATE.currentUser) localStorage.setItem('tradehub_user', JSON.stringify(STATE.currentUser));
+  else localStorage.removeItem('tradehub_user');
+}
+
+function loadCurrentUser() {
+  try {
+    const u = localStorage.getItem('tradehub_user');
+    if (u) STATE.currentUser = JSON.parse(u);
+  } catch(e) { STATE.currentUser = null; }
+}
+
+function updateNav() {
+  const guestNav = document.getElementById('guestNav');
+  const userNav  = document.getElementById('userNav');
+  const avatar   = document.getElementById('navAvatar');
+  const postBtn  = document.getElementById('postItemBtnNav');
+  const bnProfileLabel = document.getElementById('bnProfileLabel');
+  if (STATE.currentUser) {
+    guestNav.style.display = 'none';
+    userNav.style.display  = 'flex';
+    if (postBtn) postBtn.style.display = 'block';
+    avatar.textContent     = STATE.currentUser.avatar || STATE.currentUser.name.slice(0,2).toUpperCase();
+    avatar.title           = STATE.currentUser.name;
+    if (bnProfileLabel) bnProfileLabel.textContent = STATE.currentUser.name.split(' ')[0];
+  } else {
+    guestNav.style.display = 'flex';
+    userNav.style.display  = 'none';
+    if (bnProfileLabel) bnProfileLabel.textContent = 'Account';
+  }
+}
+
+function requireAuthThen(fn) {
+  if (STATE.currentUser) fn();
+  else { openAuthModal('login'); showToast('info','Please log in first'); }
+}
+
+function toggleUserMenu() {
+  const existing = document.getElementById('userDropdown');
+  if (existing) { existing.remove(); return; }
+  const items = [
+    { label:'👤 My Profile',  action:"showPage('profile')" },
+    { label:'📦 My Listings', action:"showPage('profile')" },
+    { label:'+ Post Item',    action:"showPage('post-listing')" },
+    { label:'⚡ Admin Panel', action:"showPage('admin')" },
+    { label:'🚪 Logout',      action:'logout()' },
+  ];
+  const dd = document.createElement('div');
+  dd.id = 'userDropdown';
+  dd.style.cssText = 'position:fixed;top:56px;right:12px;background:var(--black2);border:1px solid var(--black5);border-radius:var(--radius-lg);padding:6px;z-index:2000;min-width:190px;box-shadow:0 8px 32px rgba(0,0,0,0.5)';
+  dd.innerHTML = `
+    <div style="padding:10px 12px 10px;border-bottom:1px solid var(--black5);margin-bottom:4px">
+      <div style="font-weight:700;font-size:14px">${escHtml(STATE.currentUser.name)}</div>
+      <div style="font-size:12px;color:var(--gray)">${escHtml(STATE.currentUser.email)}</div>
+    </div>
+    ${items.map(i => `
+    <div style="padding:10px 12px;font-size:14px;cursor:pointer;border-radius:7px;color:var(--white);transition:background 0.15s"
+      onmouseover="this.style.background='var(--black3)'" onmouseout="this.style.background=''"
+      onclick="document.getElementById('userDropdown').remove();${i.action}">${i.label}</div>`).join('')}`;
+  document.body.appendChild(dd);
+  setTimeout(() => document.addEventListener('click', function h(ev) {
+    if (!dd.contains(ev.target) && ev.target !== document.getElementById('navAvatar')) { dd.remove(); document.removeEventListener('click', h); }
+  }), 10);
+}
+
+// ============================================================
+//  GLOBAL SEARCH
+// ============================================================
+function handleGlobalSearch(val) {
+  const trimmed = val.trim();
+  if (trimmed.length >= 2) {
+    STATE.mktFilter.search = trimmed;
+    STATE.mktFilter.cat    = 'all';
+    STATE.mktCurrentPage   = 1;
+    showPage('marketplace');
+    const el = document.getElementById('mktSearch');
+    if (el) el.value = trimmed;
+    applyFilters();
+  } else if (trimmed.length === 0) {
+    STATE.mktFilter.search = '';
+    if (STATE.currentPage === 'marketplace') applyFilters();
+  }
+}
+
+// ============================================================
+//  ADMIN PANEL
+// ============================================================
+async function renderAdmin() { showAdminTab(STATE.currentAdminTab); }
+
+async function showAdminTab(tab) {
+  STATE.currentAdminTab = tab;
+  document.querySelectorAll('[id^="aTab-"]').forEach(el => el.classList.remove('active'));
+  const tabEl = document.getElementById('aTab-' + tab);
+  if (tabEl) tabEl.classList.add('active');
+  const content = document.getElementById('adminContent');
+  content.innerHTML = '<div class="loading-overlay"><div class="spinner"></div></div>';
+  await loadCategories(); await loadListings(); await loadUsers();
+  // Mobile tab pills
+  const tabPills = `<div class="admin-tabs-mobile">
+    ${[['dashboard','📊 Dashboard'],['users','👥 Users'],['listings','📦 Listings'],['categories','🗂️ Categories'],['orders','📋 Orders'],['reviews','⭐ Reviews'],['reports','🚩 Reports']]
+      .map(([t,l]) => `<div class="admin-tab-pill ${t===tab?'active':''}" onclick="showAdminTab('${t}')">${l}</div>`).join('')}
+  </div>`;
+  let inner = '';
+  switch(tab) {
+    case 'dashboard':  inner = await renderAdminDashboard(); break;
+    case 'users':      inner = renderAdminUsers(); break;
+    case 'listings':   inner = renderAdminListings(); break;
+    case 'categories': inner = renderAdminCategories(); break;
+    case 'orders':     inner = await renderAdminOrders(); break;
+    case 'reviews':    inner = await renderAdminReviews(); break;
+    case 'reports':    inner = await renderAdminReports(); break;
+  }
+  content.innerHTML = tabPills + inner;
+}
+
+async function renderAdminDashboard() {
+  const { data: orders }  = await sb.from('orders').select('*').order('date', { ascending: false });
+  const { data: reports } = await sb.from('reports').select('*').eq('status','pending');
+  const { data: reviews } = await sb.from('reviews').select('*');
+  const chartData = [42,58,73,45,91,78,65];
+  const maxVal    = Math.max(...chartData);
+  return `
+  <div style="padding-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div><h1 style="font-size:20px;font-weight:800">Dashboard Overview</h1><p style="color:var(--gray);font-size:12px">TradeHub Admin Panel</p></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px">
+      ${[
+        ['👥','Users',STATE.users.length,'Registered'],
+        ['📦','Listings',STATE.listings.length,'Total Posted'],
+        ['📋','Orders',(orders||[]).length,'Total Offers'],
+        ['🚩','Reports',(reports||[]).length,'Pending'],
+        ['⭐','Reviews',(reviews||[]).length,'Total'],
+        ['✅','Available',STATE.listings.filter(l=>l.status==='available').length,'Active'],
+      ].map(([icon,lbl,val,trend]) => `
+        <div style="background:var(--black2);border:1px solid var(--black4);border-radius:var(--radius-lg);padding:14px 16px">
+          <div style="font-size:20px;color:var(--orange);margin-bottom:8px">${icon}</div>
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800">${val}</div>
+          <div style="font-size:12px;color:var(--gray)">${lbl}</div>
+          <div style="font-size:10px;color:#4ade80;margin-top:4px;background:rgba(34,197,94,0.1);display:inline-block;padding:2px 7px;border-radius:10px">${trend}</div>
+        </div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:16px">
+      <div class="table-wrapper" style="padding:16px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">Weekly Activity</div>
+        <div style="font-size:11px;color:var(--gray);margin-bottom:12px">Sample chart</div>
+        <div class="chart-bar-wrap">
+          ${chartData.map((v,i) => {
+            const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+            return `<div class="chart-bar" style="height:${Math.round((v/maxVal)*80)}px" data-val="${days[i]}"></div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="table-wrapper" style="padding:16px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:12px">Top Categories</div>
+        ${STATE.categories.slice(0,5).map(c => {
+          const cnt = STATE.listings.filter(l=>l.cat==c.id).length;
+          const pct = STATE.listings.length > 0 ? Math.round((cnt/STATE.listings.length)*100) : 0;
+          return `<div style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${c.icon} ${escHtml(c.name)}</span><span style="color:var(--gray)">${cnt}</span></div>
+            <div style="height:4px;background:var(--black4);border-radius:2px"><div style="height:100%;width:${pct}%;background:var(--orange);border-radius:2px"></div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    ${(orders||[]).length > 0 ? `
+    <div class="table-wrapper">
+      <div class="table-toolbar"><div class="table-toolbar-title">Recent Orders</div></div>
+      <div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Buyer</th><th>Item</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${(orders||[]).slice(0,5).map(o => `<tr>
+        <td style="color:var(--orange)">#${String(o.id).padStart(4,'0')}</td>
+        <td>${escHtml(o.buyer)}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(o.item)}</td>
+        <td><span class="chip ${o.status==='completed'?'chip-green':o.status==='pending'?'chip-yellow':'chip-blue'}">${o.status}</span></td>
+        <td style="color:var(--gray)">${o.date}</td>
+      </tr>`).join('')}</tbody></table></div>
+    </div>` : `<div class="empty-state" style="padding:30px"><div class="empty-icon">📋</div><p>No orders yet</p></div>`}
+  </div>`;
+}
+
+function renderAdminUsers() {
+  return `
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <h1 style="font-size:18px;font-weight:800">Users (${STATE.users.length})</h1>
+    </div>
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <div class="table-toolbar-title">All Users</div>
+        <input class="tbl-search" placeholder="Search users..." oninput="filterAdminUsers(this.value)">
+      </div>
+      ${STATE.users.length === 0
+        ? `<div class="empty-state" style="padding:40px"><div class="empty-icon">👥</div><p>No registered users yet</p></div>`
+        : `<div style="overflow-x:auto"><table><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="usersTableBody">${renderUsersRows(STATE.users)}</tbody></table></div>`}
+    </div>
+  </div>`;
+}
+
+function renderUsersRows(users) {
+  return users.map(u => {
+    const initials = u.avatar || u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="seller-av" style="width:28px;height:28px;font-size:10px;flex-shrink:0">${initials}</div>
+        <span style="white-space:nowrap">${escHtml(u.name)}</span>
+      </div></td>
+      <td style="color:var(--gray);font-size:12px">${escHtml(u.email)}</td>
+      <td><span class="chip ${u.role==='admin'?'chip-orange':'chip-gray'}">${u.role}</span></td>
+      <td><span class="chip ${u.status==='active'?'chip-green':'chip-red'}">${u.status}</span></td>
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="action-btn ${u.status==='active'?'btn-suspend':'btn-approve'}" onclick="toggleUserStatus(${u.id})">${u.status==='active'?'⛔':'✅'}</button>
+        <button class="action-btn btn-delete" onclick="deleteUser(${u.id})">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterAdminUsers(search) {
+  const q = search.toLowerCase();
+  const filtered = STATE.users.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
+  const tb = document.getElementById('usersTableBody');
+  if (tb) tb.innerHTML = renderUsersRows(filtered);
+}
+
+async function toggleUserStatus(userId) {
+  const user = STATE.users.find(u => u.id === userId);
+  if (!user) return;
+  const newStatus = user.status === 'active' ? 'suspended' : 'active';
+  const { error } = await sb.from('users').update({ status: newStatus }).eq('id', userId);
+  if (error) { showToast('error','Failed to update user status'); return; }
+  user.status = newStatus;
+  showToast('info',`${user.name} is now ${newStatus}`);
+  showAdminTab('users');
+}
+
+async function deleteUser(userId) {
+  if (!confirm('Delete this user and all their listings?')) return;
+  await sb.from('listings').delete().eq('seller', userId);
+  const { error } = await sb.from('users').delete().eq('id', userId);
+  if (error) { showToast('error','Failed to delete user'); return; }
+  if (STATE.currentUser?.id === userId) logout();
+  else { await loadUsers(); showAdminTab('users'); }
+  showToast('success','User deleted');
+}
+
+function renderAdminListings() {
+  return `
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <h1 style="font-size:18px;font-weight:800">Listings (${STATE.listings.length})</h1>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="chip chip-green">Approved: ${STATE.listings.filter(l=>l.approved).length}</span>
+        <span class="chip chip-yellow">Pending: ${STATE.listings.filter(l=>!l.approved).length}</span>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <div class="table-toolbar-title">All Listings</div>
+        <input class="tbl-search" placeholder="Search..." oninput="filterAdminListings(this.value)">
+      </div>
+      ${STATE.listings.length === 0
+        ? `<div class="empty-state" style="padding:40px"><div class="empty-icon">📦</div><p>No listings yet</p></div>`
+        : `<div style="overflow-x:auto"><table><thead><tr><th>Item</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="listingsTableBody">${renderListingsRows(STATE.listings)}</tbody></table></div>`}
+    </div>
+  </div>`;
+}
+
+function renderListingsRows(listings) {
+  return listings.map(l => {
+    const cat    = getCat(l.cat);
+    const thumb  = l.images && l.images.length > 0
+      ? `<img src="${l.images[0]}" style="width:32px;height:32px;border-radius:6px;object-fit:cover;flex-shrink:0">`
+      : `<span style="font-size:20px">${cat?.icon||'📦'}</span>`;
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px;max-width:160px">${thumb}
+        <span style="font-weight:500;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(l.title)}</span></div></td>
+      <td style="color:var(--orange);font-weight:600;white-space:nowrap">₱${Number(l.price||0).toLocaleString()}</td>
+      <td><span class="chip ${l.status==='available'?'chip-green':l.status==='sold'?'chip-red':'chip-yellow'}">${l.status}</span></td>
+      <td><div style="display:flex;gap:4px">
+        <button class="action-btn btn-edit" onclick="viewItem(${l.id})">👁️</button>
+        <button class="action-btn btn-delete" onclick="adminDeleteListing(${l.id})">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterAdminListings(search) {
+  const q = search.toLowerCase();
+  const filtered = STATE.listings.filter(l => l.title.toLowerCase().includes(q) || (l.location||'').toLowerCase().includes(q));
+  const tb = document.getElementById('listingsTableBody');
+  if (tb) tb.innerHTML = renderListingsRows(filtered);
+}
+
+async function adminDeleteListing(id) {
+  if (!confirm('Remove this listing?')) return;
+  const { error } = await sb.from('listings').delete().eq('id', id);
+  if (error) { showToast('error','Failed to delete listing'); return; }
+  STATE.listings = STATE.listings.filter(l => l.id !== id);
+  showToast('success','Listing removed');
+  showAdminTab('listings');
+}
+
+function renderAdminCategories() {
+  return `
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <h1 style="font-size:18px;font-weight:800">Categories (${STATE.categories.length})</h1>
+      <button class="btn-primary" onclick="openAddCatModal()" style="font-size:13px;padding:9px 16px">+ Add Category</button>
+    </div>
+    <div class="table-wrapper">
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Icon</th><th>Name</th><th>Listings</th><th>Actions</th></tr></thead>
+        <tbody>${STATE.categories.map(c => {
+          const cnt = STATE.listings.filter(l => l.cat == c.id).length;
+          return `<tr>
+            <td style="font-size:22px">${c.icon}</td>
+            <td><strong>${escHtml(c.name)}</strong></td>
+            <td><span class="chip chip-orange">${cnt}</span></td>
+            <td><div style="display:flex;gap:4px">
+              <button class="action-btn btn-edit" onclick="editCategory(${c.id})">✏️</button>
+              <button class="action-btn btn-delete" onclick="deleteCategory(${c.id})">🗑️</button>
+            </div></td>
+          </tr>`;
+        }).join('')}</tbody></table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function openAddCatModal() {
+  STATE.editingCategoryId = null;
+  document.getElementById('catModalTitle').textContent = 'Add Category';
+  ['catName','catIcon','catDesc'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  showModal('addCatModal');
+}
+
+function editCategory(id) {
+  const cat = STATE.categories.find(c => c.id === id);
+  if (!cat) return;
+  STATE.editingCategoryId = id;
+  document.getElementById('catModalTitle').textContent = 'Edit Category';
+  document.getElementById('catName').value = cat.name;
+  document.getElementById('catIcon').value = cat.icon;
+  document.getElementById('catDesc').value = cat.description || '';
+  showModal('addCatModal');
+}
+
+async function saveCategoryForm() {
+  const name = document.getElementById('catName').value.trim();
+  const icon = document.getElementById('catIcon').value.trim() || '📦';
+  const description = document.getElementById('catDesc').value.trim();
+  if (!name) return;
+  if (STATE.editingCategoryId) {
+    const { error } = await sb.from('categories').update({ name, icon, description }).eq('id', STATE.editingCategoryId);
+    if (error) { showToast('error','Failed to update category'); return; }
+    showToast('success','Category updated!');
+  } else {
+    const { error } = await sb.from('categories').insert({ name, icon, description });
+    if (error) { showToast('error','Failed to add category'); return; }
+    showToast('success','Category added!');
+  }
+  closeModal('addCatModal');
+  await loadCategories();
+  showAdminTab('categories');
+}
+
+async function deleteCategory(id) {
+  const hasListings = STATE.listings.some(l => l.cat == id);
+  if (hasListings && !confirm('This category has listings. Delete anyway?')) return;
+  else if (!hasListings && !confirm('Delete this category?')) return;
+  const { error } = await sb.from('categories').delete().eq('id', id);
+  if (error) { showToast('error','Failed to delete category'); return; }
+  showToast('success','Category deleted');
+  await loadCategories();
+  showAdminTab('categories');
+}
+
+async function renderAdminOrders() {
+  const { data: orders } = await sb.from('orders').select('*').order('date', { ascending: false });
+  const o2 = orders || [];
+  return `
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <h1 style="font-size:18px;font-weight:800">Orders (${o2.length})</h1>
+      <div style="display:flex;gap:8px">
+        <span class="chip chip-yellow">Pending: ${o2.filter(o=>o.status==='pending').length}</span>
+        <span class="chip chip-green">Completed: ${o2.filter(o=>o.status==='completed').length}</span>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      ${o2.length === 0
+        ? `<div class="empty-state" style="padding:40px"><div class="empty-icon">📋</div><p>No orders yet</p></div>`
+        : `<div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Buyer</th><th>Item</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${o2.map(o => `<tr>
+            <td style="color:var(--orange);font-weight:600">#${String(o.id).padStart(4,'0')}</td>
+            <td style="white-space:nowrap">${escHtml(o.buyer)}</td>
+            <td style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(o.item)}</td>
+            <td style="color:var(--orange);font-weight:600;white-space:nowrap">${o.amount>0?'₱'+Number(o.amount).toLocaleString():'Trade'}</td>
+            <td><span class="chip ${o.status==='completed'?'chip-green':o.status==='pending'?'chip-yellow':o.status==='accepted'?'chip-blue':'chip-red'}">${o.status}</span></td>
+            <td><div style="display:flex;gap:4px">
+              ${o.status==='pending'  ? `<button class="action-btn btn-approve" onclick="updateOrder(${o.id},'accepted')">✅</button>` : ''}
+              ${o.status==='accepted' ? `<button class="action-btn btn-approve" onclick="updateOrder(${o.id},'completed')">✔</button>` : ''}
+              ${o.status==='pending'  ? `<button class="action-btn btn-suspend" onclick="updateOrder(${o.id},'rejected')">❌</button>` : ''}
+              <button class="action-btn btn-delete" onclick="deleteOrder(${o.id})">🗑️</button>
+            </div></td>
+          </tr>`).join('')}</tbody></table></div>`}
+    </div>
+  </div>`;
+}
+
+async function updateOrder(id, status) {
+  await sb.from('orders').update({ status }).eq('id', id);
+  showToast('success',`Order marked as ${status}`);
+  showAdminTab('orders');
+}
+async function deleteOrder(id) {
+  if (!confirm('Delete this order record?')) return;
+  await sb.from('orders').delete().eq('id', id);
+  showToast('success','Order deleted');
+  showAdminTab('orders');
+}
+
+async function renderAdminReviews() {
+  const { data: reviews } = await sb.from('reviews').select('*').order('date', { ascending: false });
+  const rv = reviews || [];
+  return `
+  <div>
+    <h1 style="font-size:18px;font-weight:800;margin-bottom:14px">Reviews (${rv.length})</h1>
+    ${rv.length === 0
+      ? `<div class="empty-state" style="padding:40px"><div class="empty-icon">⭐</div><p>No reviews yet</p></div>`
+      : rv.map(r => {
+          const initials = r.reviewer ? r.reviewer.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : '?';
+          return `
+          <div class="review-card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+              <div style="flex:1;min-width:0">
+                <div class="review-header" style="margin-bottom:6px">
+                  <div class="seller-av" style="width:30px;height:30px;font-size:11px">${initials}</div>
+                  <div><div style="font-weight:600;font-size:13px">${escHtml(r.reviewer||'Anonymous')}</div><div style="font-size:11px;color:var(--gray)">${r.date}</div></div>
+                  <div style="margin-left:auto;font-size:13px">${'⭐'.repeat(r.rating)}</div>
+                </div>
+                <div class="review-text" style="font-size:13px">${escHtml(r.comment)}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
+                <span class="chip ${r.approved?'chip-green':'chip-yellow'}">${r.approved?'OK':'Pending'}</span>
+                <button class="action-btn btn-delete" onclick="deleteReview(${r.id})">🗑️</button>
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+  </div>`;
+}
+
+async function deleteReview(id) {
+  await sb.from('reviews').delete().eq('id', id);
+  showToast('success','Review removed');
+  showAdminTab('reviews');
+}
+
+async function renderAdminReports() {
+  const { data: reports } = await sb.from('reports').select('*').order('date', { ascending: false });
+  const rp = reports || [];
+  return `
+  <div>
+    <h1 style="font-size:18px;font-weight:800;margin-bottom:14px">Reports (${rp.length})</h1>
+    ${rp.length === 0
+      ? `<div class="empty-state" style="padding:40px"><div class="empty-icon">🚩</div><p>No reports yet</p></div>`
+      : rp.map(r => `
+          <div class="report-card">
+            <div class="report-icon">🚩</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;margin-bottom:3px">${escHtml(r.reason)}</div>
+              <div style="font-size:11px;color:var(--gray)">By: ${escHtml(r.reporter)} · ${r.date}</div>
+              <div style="font-size:12px;color:var(--gray);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Item: ${escHtml(r.item)}</div>
+              <div style="font-size:12px;color:var(--white2);margin-top:6px">${escHtml(r.detail)}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
+              <span class="chip ${r.status==='pending'?'chip-red':'chip-green'}">${r.status}</span>
+              ${r.status==='pending' ? `
+                <button class="action-btn btn-approve" onclick="resolveReport(${r.id})">✅</button>
+                <button class="action-btn btn-delete" onclick="dismissReport(${r.id})">🗑️</button>
+              ` : ''}
+            </div>
+          </div>`).join('')}
+  </div>`;
+}
+
+async function resolveReport(id) {
+  await sb.from('reports').update({ status:'resolved' }).eq('id', id);
+  showToast('success','Report resolved');
+  showAdminTab('reports');
+}
+async function dismissReport(id) {
+  await sb.from('reports').delete().eq('id', id);
+  showToast('info','Report dismissed');
+  showAdminTab('reports');
+}
+
+// ============================================================
+//  MODALS
+// ============================================================
+function showModal(id) { const el = document.getElementById(id); if (el) el.classList.add('open'); }
+function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(type, message) {
+  const icons = { success:'✅', error:'❌', info:'ℹ️', warning:'⚠️' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><span>${escHtml(message)}</span>`;
+  const container = document.getElementById('toastContainer');
+  container.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='all 0.3s'; setTimeout(()=>t.remove(),300); }, 3200);
+}
+
+// ============================================================
+//  UTILITIES
+// ============================================================
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+// ============================================================
+//  INIT
+// ============================================================
+loadCurrentUser();
+updateNav();
+showPage('home');
+</script>
+</body>
+</html>
