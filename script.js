@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    /* ---------- Mobile menu ---------- */
+    // Mobile menu
     var menuBtn = document.getElementById("menuBtn");
     var navLinks = document.getElementById("navLinks");
 
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
         link.addEventListener("click", closeMenu);
     });
 
-    /* ---------- Navbar shadow, back-to-top, active link ---------- */
+    // Navbar and scroll
     var navbar = document.getElementById("navbar");
     var toTop = document.getElementById("toTop");
     var sections = document.querySelectorAll("main section[id]");
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
         window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    /* ---------- Reveal on scroll ---------- */
+    // Scroll reveal
     var revealEls = document.querySelectorAll(".reveal");
     if ("IntersectionObserver" in window) {
         var observer = new IntersectionObserver(function (entries) {
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
         revealEls.forEach(function (el) { el.classList.add("visible"); });
     }
 
-    /* ---------- Project category filter ---------- */
+    // Project filter
     var filterBtns = document.querySelectorAll(".filter");
     var cards = document.querySelectorAll(".project-card");
 
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    /* ---------- Lightbox ---------- */
+    // Lightbox
     var lightbox = document.getElementById("lightbox");
     var lbImg = document.getElementById("lightboxImg");
     var lbCaption = document.getElementById("lightboxCaption");

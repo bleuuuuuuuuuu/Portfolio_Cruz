@@ -1,4 +1,4 @@
-/* COLORS  */
+/* Colors */
 :root {
     --blue-900: #e8f0ff;
     --blue-700: #60a5fa;
@@ -30,7 +30,7 @@ h1, h2, h3, .logo, .btn { font-family: 'Poppins', sans-serif; }
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 
-/* ===== NAVBAR ===== */
+/* Navbar */
 .navbar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
@@ -58,7 +58,7 @@ a { color: inherit; text-decoration: none; }
     width: 44px; height: 44px;
 }
 
-/* ===== BUTTONS ===== */
+/* Buttons */
 .btn {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 12px 26px; border-radius: 999px; border: 2px solid transparent;
@@ -72,7 +72,7 @@ a { color: inherit; text-decoration: none; }
 .btn-outline:hover { background: var(--blue-700); color: var(--white); }
 .btn-sm { padding: 9px 20px; font-size: .88rem; }
 
-/* ===== HERO ===== */
+/* Hero */
 .hero {
     min-height: 100vh;
     display: flex; align-items: center; justify-content: space-between; gap: 40px;
@@ -94,7 +94,7 @@ a { color: inherit; text-decoration: none; }
 }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 
-/* ===== SECTIONS ===== */
+/* Sections */
 .section { padding: 90px 8%; }
 .section.alt { background: var(--blue-50); }
 .section-title { text-align: center; font-size: 2.2rem; color: var(--blue-900); }
@@ -115,7 +115,7 @@ a { color: inherit; text-decoration: none; }
 .card h3 i { margin-right: 8px; }
 .mt { margin-top: 22px; }
 
-/* ===== ABOUT ===== */
+/* About */
 .about-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 24px; }
 .edu-list { list-style: none; }
 .edu-list li { padding: 10px 0; border-bottom: 1px dashed var(--blue-300); display: flex; flex-direction: column; }
@@ -136,7 +136,7 @@ a { color: inherit; text-decoration: none; }
 .motto i { font-size: 1.4rem; opacity: .6; }
 .motto p { font-size: 1.25rem; font-weight: 600; font-style: italic; margin-top: 6px; }
 
-/* ===== PROJECTS ===== */
+/* Projects */
 .filters { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
 .filter {
     padding: 8px 20px; border-radius: 999px; cursor: pointer;
@@ -168,7 +168,7 @@ a { color: inherit; text-decoration: none; }
 .project-body p { color: var(--muted); font-size: .95rem; margin-bottom: 16px; }
 .empty { text-align: center; color: var(--muted); }
 
-/* ===== ACHIEVEMENTS ===== */
+/* Achievements */
 .timeline { position: relative; max-width: 760px; margin: 0 auto; padding-left: 36px; }
 .timeline::before {
     content: ""; position: absolute; left: 10px; top: 0; bottom: 0;
@@ -192,7 +192,7 @@ a { color: inherit; text-decoration: none; }
 }
 .cert-img:hover { transform: scale(1.02); }
 
-/* ===== CONTACT ===== */
+/* Contact */
 .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 24px; max-width: 900px; margin: 0 auto; }
 .email-link { color: var(--blue-700); font-weight: 700; word-break: break-all; }
 .email-link:hover { text-decoration: underline; }
@@ -217,10 +217,10 @@ form textarea { resize: vertical; }
 form .btn { margin-top: 18px; }
 .form-note { font-size: .8rem; color: var(--muted); margin-top: 10px; }
 
-/* ===== FOOTER ===== */
+/* Footer */
 .footer { text-align: center; padding: 26px 6%; background: #060b16; color: var(--muted); font-size: .9rem; }
 
-/* ===== LIGHTBOX ===== */
+/* Lightbox */
 .lightbox {
     position: fixed; inset: 0; z-index: 200;
     background: rgba(3, 7, 18, 0.94);
@@ -237,7 +237,7 @@ form .btn { margin-top: 18px; }
     font-size: 2.6rem; line-height: 1; cursor: pointer;
 }
 
-/* ===== BACK TO TOP ===== */
+/* Back to top */
 .to-top {
     position: fixed; right: 22px; bottom: 22px; z-index: 90;
     width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer;
@@ -248,7 +248,7 @@ form .btn { margin-top: 18px; }
 }
 .to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
 
-/* ===== SCROLL ANIMATION ===== */
+/* Scroll animation */
 .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
@@ -258,7 +258,7 @@ form .btn { margin-top: 18px; }
     .hero-photo img { animation: none; }
 }
 
-/* ===== RESPONSIVE ===== */
+/* Responsive */
 @media (max-width: 800px) {
     .menu-btn { display: block; }
     .nav-links {
@@ -281,6 +281,8 @@ form .btn { margin-top: 18px; }
     .timeline-dot { left: -30px; }
 }
 
+
+/* Certificate links */
 .achievement-link { display: block; cursor: pointer; }
 .achievement-link:hover { border-color: var(--blue-700); }
 .view-cert { display: inline-block; margin-top: 12px; font-weight: 700; font-size: .9rem; color: var(--blue-700); }

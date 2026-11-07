@@ -1,10 +1,10 @@
 <?php
 
-// 1. ABOUT ME 
+// About Me
 $profile = [
     "name" => "Rei Marcus M. Cruz",
     "tagline" => "3rd Year IT Student / Working Student",
-    "photo" => "profile.jpg",
+    "photo" => "thumbnails/profile.jpg",
     "intro" => "Hi! I'm a 3rd-year IT working student who works hard to support myself while pursuing my education. 
                 Balancing work and studies isn't always easy, but I'm determined to keep learning, improving my skills,
                 and building a better future for myself.",
@@ -17,14 +17,14 @@ $profile = [
     "motto" => "Small progress is still progress."
 ];
 
-// 2. MY PROJECTS
+// Projects
 
 $projects = [
     [
         "title"       => "TradeHub",
         "category"    => "Web Development",
         "description" => "A marketplace website where users can sell, buy, or trade their items.",
-        "image"       => "tradehub.png",
+        "image"       => "thumbnails/tradehub.png",
         "link"        => "tradehub/Tradehub.html",
         "type"        => "link",
     ],
@@ -32,7 +32,7 @@ $projects = [
         "title"       => "GBikes",
         "category"    => "Web Development",
         "description" => "A website for a second-hand motorcycle dealership.",
-        "image"       => "gbikes.png",
+        "image"       => "thumbnails/gbikes.png",
         "link"        => "gbikes/Gbikes%20Website.html",
         "type"        => "link",
     ],
@@ -40,7 +40,7 @@ $projects = [
         "title"       => "GreenLeafy Poster",
         "category"    => "Graphic Design",
         "description" => "A multimedia promotional poster for a matcha beverage brand.",
-        "image"       => "greenleafy.png",
+        "image"       => "thumbnails/greenleafy.png",
         "link"        => "",
         "type"        => "image",
     ],
@@ -48,75 +48,67 @@ $projects = [
         "title"       => "Kayumi Logo",
         "category"    => "Graphic Design",
         "description" => "A logo design for a makeup brand.",
-        "image"       => "kayumi.png",
+        "image"       => "thumbnails/kayumi.png",
         "link"        => "",
         "type"        => "image",
     ],
 ];
 
-// 3. ACHIEVEMENTS / CERTIFICATES
-// Where your certificates PDF is (relative to index.php). Change this if you move the file.
-$certPdf = "certificates.pdf";
+// Certificates
+$certPdf = "credentials/certificates.pdf";
 
-// "page" = the page number of that certificate inside the PDF.
-// "thumb" = the certificate picture (kept next to index.php). Only the first one is shown in the card.
 $achievements = [
     [
         "title"   => "National Certificate II - Computer Systems Servicing",
         "year"    => "2024",
         "caption" => "TESDA · Issued April 5, 2024",
         "page"    => 1,
-        "thumb"   => "nc2.jpg",
+        "thumb"   => "thumbnails/nc2.jpg",
     ],
     [
         "title"   => "Getting Started with Cisco Packet Tracer",
         "year"    => "2025",
         "caption" => "Cisco Networking Academy · Completed August 25, 2025",
         "page"    => 2,
-        "thumb"   => "first.png",
+        "thumb"   => "thumbnails/first.png",
     ],
     [
         "title"   => "Exploring Internet of Things with Cisco Packet Tracer",
         "year"    => "2025",
         "caption" => "Cisco Networking Academy · Completed September 2, 2025",
         "page"    => 3,
-        "thumb"   => "iot.png",
+        "thumb"   => "thumbnails/iot.png",
     ],
     [
         "title"   => "Exploring Networking with Cisco Packet Tracer",
         "year"    => "2025",
         "caption" => "Cisco Networking Academy · Completed August 25, 2025",
         "page"    => 4,
-        "thumb"   => "exploring.png",
+        "thumb"   => "thumbnails/exploring.png",
     ],
     [
         "title"   => "Introduction to Packet Tracer Exam",
         "year"    => "2025",
         "caption" => "Cisco Networking Academy · Completed September 2, 2025",
         "page"    => 5,
-        "thumb"   => "intro.png",
+        "thumb"   => "thumbnails/intro.png",
     ],
 ];
 
-// 4. CONTACT
+// Contact
 $contact = [
     "email"    => "crz.reiii@gmail.com",
     "socials"  => [
         ["name" => "Facebook",  "icon" => "fa-brands fa-facebook-f", "url" => "https://www.facebook.com/rei.mrcs"],
         ["name" => "Instagram", "icon" => "fa-brands fa-instagram",  "url" => "https://www.instagram.com/r.crz25_"],
         ["name" => "GitHub",    "icon" => "fa-brands fa-github",     "url" => "https://github.com/bleuuuuuuuuuu"],
-        // Add more here, e.g. LinkedIn, TikTok, YouTube.
     ],
 ];
 
-/* =====================================================================
-   DON'T NEED TO TOUCH ANYTHING BELOW unless you want to change the layout
-   ===================================================================== */
-
-// Escape text so special characters can't break the page
+// Escape text
 function e($text) { return htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8'); }
 
-// If an image file is missing, show a blue placeholder instead of a broken icon
+// Placeholder image
 function img($path, $label = "Image") {
     if ($path !== "" && file_exists(__DIR__ . "/" . $path)) {
         return e($path);
@@ -130,7 +122,10 @@ function img($path, $label = "Image") {
     return 'data:image/svg+xml;base64,' . base64_encode($svg);
 }
 
-$firstName = "Reiquan";   // name shown in the top-left logo
+// Logo name
+$firstName = "Reiquan";
+
+// Project categories
 $categories = array_values(array_unique(array_column($projects, "category")));
 ?>
 <!DOCTYPE html>
@@ -146,7 +141,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* ===== CERTIFICATES CARD ===== */
+        /* Certificates */
         .certs-card {
             max-width: 760px; margin: 0 auto;
             background: #101c33; border: 1px solid var(--blue-100);
@@ -186,7 +181,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
         .certs-btn { margin-top: 24px; }
         @media (max-width: 480px) { .certs-card { padding: 24px 18px; } }
 
-        /* ===== PROJECT CARDS: equal size, aligned, fills the row ===== */
+        /* Project cards */
         .project-grid {
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             max-width: 1200px; margin: 0 auto; align-items: stretch;
@@ -194,22 +189,22 @@ $categories = array_values(array_unique(array_column($projects, "category")));
         .project-card { display: flex; flex-direction: column; height: 100%; }
         .project-body { display: flex; flex-direction: column; flex: 1; }
         .project-body h3 { line-height: 1.35; }
-        .project-body p { flex: 1; }               /* pushes the button to the bottom */
+        .project-body p { flex: 1; }
         .project-body .btn { align-self: flex-start; margin-top: auto; }
 
-        /* ===== CONTACT: single centered card ===== */
+        /* Contact */
         .contact-single { grid-template-columns: 1fr; max-width: 520px; }
         .contact-single .card { text-align: center; padding: 36px 28px; }
         .contact-single .email-link { font-size: 1.1rem; }
         .contact-single .socials { justify-content: center; }
 
-        /* ===== Clickable project pictures ===== */
+        /* Project thumbnails */
         a.project-thumb { display: block; }
         .project-thumb { cursor: pointer; }
 
-        /* ===== CONTACT colors ===== */
-        .contact-single .card h3 { color: var(--blue-900); }              /* white-ish headings */
-        .contact-single .card h3 i { color: var(--blue-700); }            /* blue icons */
+        /* Contact colors */
+        .contact-single .card h3 { color: var(--blue-900); }
+        .contact-single .card h3 i { color: var(--blue-700); }
         .contact-single .email-link { color: #ffffff; }
         .contact-single .email-link:hover { color: var(--blue-700); }
         .contact-single .socials a { color: #ffffff; }
@@ -221,7 +216,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
 </head>
 <body>
 
-<!-- ============ NAVIGATION ============ -->
+<!-- Navigation -->
 <header class="navbar" id="navbar">
     <a href="#home" class="logo"><?= e($firstName) ?><span>.</span></a>
     <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
@@ -238,7 +233,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
 
 <main>
 
-<!-- ============ HOME ============ -->
+<!-- Home -->
 <section class="hero" id="home">
     <div class="hero-text reveal">
         <p class="hello">Hello there! I'm</p>
@@ -247,7 +242,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
         <div class="hero-buttons">
             <a href="#projects" class="btn btn-primary">See My Projects</a>
             <a href="#contact" class="btn btn-outline">Say Hi</a>
-            <a href="res.pdf" class="btn btn-outline" target="_blank" rel="noopener noreferrer">
+            <a href="credentials/res.pdf" class="btn btn-outline" target="_blank" rel="noopener noreferrer">
                 <i class="fa-solid fa-file-lines"></i> View Resume
             </a>
         </div>
@@ -257,7 +252,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
     </div>
 </section>
 
-<!-- ============ ABOUT ME ============ -->
+<!-- About Me -->
 <section class="section" id="about">
     <h2 class="section-title reveal">About Me</h2>
     <p class="section-sub reveal">A little bit about who I am</p>
@@ -303,7 +298,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
     </blockquote>
 </section>
 
-<!-- ============ PROJECTS ============ -->
+<!-- Projects -->
 <section class="section alt" id="projects">
     <h2 class="section-title reveal">My Projects</h2>
     <p class="section-sub reveal">Things I've made and activities I've done</p>
@@ -319,13 +314,13 @@ $categories = array_values(array_unique(array_column($projects, "category")));
         ?>
         <article class="project-card reveal" data-category="<?= e($p["category"]) ?>">
             <?php if ($isLink): ?>
-            <!-- Website project: clicking the picture opens the site -->
+            <!-- Website project -->
             <a class="project-thumb" href="<?= e($p["link"]) ?>" target="_blank" rel="noopener noreferrer" aria-label="Open <?= e($p["title"]) ?>">
                 <img src="<?= $src ?>" alt="<?= e($p["title"]) ?>" loading="lazy">
                 <span class="badge"><?= e($p["category"]) ?></span>
             </a>
             <?php else: ?>
-            <!-- Design project: clicking the picture opens it full size -->
+            <!-- Graphic project -->
             <div class="project-thumb lightbox-trigger" role="button" tabindex="0"
                  data-src="<?= $src ?>" data-caption="<?= e($p["title"]) ?>" aria-label="View <?= e($p["title"]) ?>">
                 <img src="<?= $src ?>" alt="<?= e($p["title"]) ?>" loading="lazy">
@@ -351,7 +346,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
     </div>
 </section>
 
-<!-- ============ ACHIEVEMENTS ============ -->
+<!-- Achievements -->
 <section class="section" id="achievements">
     <h2 class="section-title reveal">Achievements</h2>
     <p class="section-sub reveal">Awards, certificates and moments I'm proud of</p>
@@ -359,7 +354,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
     <div class="certs-card reveal">
         <h3>Certificates</h3>
 
-        <!-- Shows the first certificate. Clicking it opens the whole PDF. -->
+        <!-- Certificate preview -->
         <a class="certs-preview" href="<?= e($certPdf) ?>" target="_blank" rel="noopener noreferrer" title="Open all certificates (PDF)">
             <img src="<?= img($achievements[0]["thumb"], "Certificates") ?>" alt="Preview of my certificates">
         </a>
@@ -380,7 +375,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
     </div>
 </section>
 
-<!-- ============ CONTACT ============ -->
+<!-- Contact -->
 <section class="section alt" id="contact">
     <h2 class="section-title reveal">Contact Me</h2>
     <p class="section-sub reveal">Let's talk! I'd love to hear from you</p>
@@ -408,7 +403,7 @@ $categories = array_values(array_unique(array_column($projects, "category")));
     <p>© <?= date("Y") ?> <?= e($profile["name"]) ?></p>
 </footer>
 
-<!-- ============ LIGHTBOX ============ -->
+<!-- Lightbox -->
 <div class="lightbox" id="lightbox" aria-hidden="true">
     <button class="lightbox-close" id="lightboxClose" aria-label="Close preview">&times;</button>
     <figure>
